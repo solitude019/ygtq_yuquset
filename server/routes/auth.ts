@@ -65,8 +65,10 @@ router.post('/login', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      token,
-      admin: { id: data.id, username: data.username },
+      data: {
+        token,
+        admin: { id: data.id, username: data.username },
+      },
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -79,7 +81,9 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     res.json({
       success: true,
-      admin: { id: req.adminId, username: req.adminUsername },
+      data: {
+        admin: { id: req.adminId, username: req.adminUsername },
+      },
     });
   } catch (err) {
     console.error('Get admin info error:', err);
