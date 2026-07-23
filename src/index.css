@@ -2,20 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  body {
+    @apply font-body text-slate-800 bg-white antialiased;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-primary hover:bg-primary-light text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200;
+  }
 }

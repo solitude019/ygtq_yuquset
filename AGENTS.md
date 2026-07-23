@@ -2,8 +2,12 @@
 
 ## 技术栈
 
-- **核心**: Vite 7, TypeScript, Express
-- **UI**: Tailwind CSS
+- **前端**: Vue 3 (Composition API + `<script setup>`), TypeScript, Vue Router, Pinia
+- **后端**: Node.js, Express, TypeScript
+- **数据库**: PostgreSQL (pg)
+- **构建工具**: Vite 7
+- **样式**: Tailwind CSS 3
+- **认证**: JWT (jsonwebtoken + bcryptjs)
 
 ## 目录结构
 
@@ -15,32 +19,78 @@
 │   └── start.sh        # 生产环境启动脚本
 ├── server/             # 服务端逻辑
 │   ├── routes/         # API 路由
+│   │   ├── index.ts    # 路由汇总
+│   │   ├── auth.ts     # 认证路由 (登录/获取信息)
+│   │   ├── products.ts # 商品 CRUD 路由
+│   │   └── categories.ts # 分类 CRUD 路由
+│   ├── db.ts           # PostgreSQL 连接池
 │   ├── server.ts       # Express 服务入口
 │   └── vite.ts         # Vite 中间件集成
 ├── src/                # 前端源码
-│   ├── index.css       # 全局样式
-│   ├── index.ts        # 客户端入口
-│   └── main.ts         # 主逻辑
+│   ├── app/
+│   │   ├── api/        # API 客户端
+│   │   ├── components/ # Vue 组件
+│   │   ├── router/     # Vue Router 配置
+│   │   ├── stores/     # Pinia 状态管理
+│   │   ├── views/      # 页面视图
+│   │   ├── App.vue     # 根组件
+│   │   └── main.ts     # Vue 应用入口
+│   └── index.css       # 全局样式 (Tailwind)
+├── public/images/      # 静态图片资源
 ├── index.html          # 入口 HTML
 ├── package.json        # 项目依赖管理
 ├── tsconfig.json       # TypeScript 配置
+├── tailwind.config.js  # Tailwind 配置
 └── vite.config.ts      # Vite 配置
 ```
+
+## 数据库
+
+- 使用 PostgreSQL，通过 `exec_sql` 工具管理
+- 表: admins (管理员), categories (分类), products (商品)
+- 连接配置通过环境变量: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+
+## API 接口
+
+### 公开接口
+- `GET /api/products` - 商品列表 (支持 ?category= 筛选)
+- `GET /api/products/:id` - 商品详情
+- `GET /api/categories` - 分类列表
+
+### 认证接口
+- `POST /api/auth/login` - 管理员登录
+- `GET /api/auth/me` - 获取当前管理员信息 (需认证)
+
+### 管理接口 (需 Bearer Token)
+- `POST /api/products` - 创建商品
+- `PUT /api/products/:id` - 更新商品
+- `DELETE /api/products/:id` - 删除商品
+- `POST /api/categories` - 创建分类
+- `PUT /api/categories/:id` - 更新分类
+- `DELETE /api/categories/:id` - 删除分类
+
+## 前端路由
+
+- `/` - 首页 (品牌介绍 + 精选商品)
+- `/products` - 商品列表 (支持分类筛选)
+- `/products/:id` - 商品详情
+- `/about` - 关于我们
+- `/admin/login` - 管理员登录
+- `/admin` - 管理后台 (商品/分类 CRUD)
 
 ## 包管理规范
 
 **仅允许使用 pnpm** 作为包管理器，**严禁使用 npm 或 yarn**。
-**常用命令**：
-- 安装依赖：`pnpm add <package>`
-- 安装开发依赖：`pnpm add -D <package>`
-- 安装所有依赖：`pnpm install`
-- 移除依赖：`pnpm remove <package>`
 
 ## 开发规范
 
 - 使用 Tailwind CSS 进行样式开发
+- Vue 组件使用 `<script setup lang="ts">` 语法
+- 默认按 TypeScript `strict` 心智写代码
+- 禁止隐式 `any` 和 `as any`
+- 函数参数必须有类型标注
 
-### 编码规范
+## 管理员默认账号
 
-- 默认按 TypeScript `strict` 心智写代码；优先复用当前作用域已声明的变量、函数、类型和导入，禁止引用未声明标识符或拼错变量名。
-- 禁止隐式 `any` 和 `as any`；函数参数、返回值、解构项、事件对象、Express `req`/`res`、`catch` 错误在使用前应有明确类型或先完成类型收窄，并清理未使用的变量和导入。
+- 用户名: admin
+- 密码: admin123

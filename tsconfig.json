@@ -5,13 +5,17 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
+    "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src", "server"]
+  "include": ["src", "server", "env.d.ts"]
 }

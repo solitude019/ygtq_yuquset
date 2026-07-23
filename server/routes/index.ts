@@ -1,31 +1,22 @@
 import { Router } from 'express';
+import authRoutes from './auth';
+import productRoutes from './products';
+import categoryRoutes from './categories';
 
 const router = Router();
 
-// API 路由示例
-router.get('/api/hello', (req, res) => {
-  res.json({
-    message: 'Hello from Express + Vite!',
-    timestamp: new Date().toISOString(),
-  });
-});
-
-router.post('/api/data', (req, res) => {
-  const requestData = req.body;
-  res.json({
-    success: true,
-    data: requestData,
-    receivedAt: new Date().toISOString(),
-  });
-});
-
-// 健康检查接口
-router.get('/api/health', (req, res) => {
+// Health check
+router.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     env: process.env.COZE_PROJECT_ENV,
     timestamp: new Date().toISOString(),
   });
 });
+
+// API routes
+router.use('/api/auth', authRoutes);
+router.use('/api/products', productRoutes);
+router.use('/api/categories', categoryRoutes);
 
 export default router;
