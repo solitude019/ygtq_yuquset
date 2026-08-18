@@ -148,22 +148,22 @@ let slideInterval: ReturnType<typeof setInterval> | null = null;
 
 const slides = [
   {
-    image: '/images/hero-banner.jpg',
-    subtitle: 'New Season Collection',
-    title: 'ELEVATE YOUR GAME',
-    desc: 'Professional-grade ball sports equipment engineered for peak performance. From the court to the field.',
+    image: '/images/hero-badminton-1.jpg',
+    subtitle: 'Badminton Collection',
+    title: 'SMASH WITH POWER',
+    desc: 'Professional badminton rackets and shuttlecocks engineered for peak performance on every court.',
   },
   {
-    image: '/images/product-football-1.png',
-    subtitle: 'Match Day Ready',
-    title: 'PRECISION IN EVERY KICK',
-    desc: 'Official match balls trusted by professionals worldwide. Superior flight stability and water resistance.',
+    image: '/images/hero-badminton-2.jpg',
+    subtitle: 'Speed & Precision',
+    title: 'BORN TO FLY',
+    desc: 'Experience lightning-fast reflexes with our tournament-grade shuttlecocks. Every shot counts.',
   },
   {
-    image: '/images/product-basketball-1.png',
-    subtitle: 'Indoor & Outdoor',
-    title: 'DOMINATE THE COURT',
-    desc: 'Premium basketballs engineered for exceptional grip and consistency. Built for champions.',
+    image: '/images/hero-badminton-3.jpg',
+    subtitle: 'Pro Series',
+    title: 'STRINGED FOR VICTORY',
+    desc: 'Carbon-fiber rackets with ultra-responsive string beds. Trusted by championship players worldwide.',
   },
 ];
 
