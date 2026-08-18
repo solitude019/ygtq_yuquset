@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { getDb } from '../lib/supabase';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'apex-ball-secret-key-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'yu-secret-key-2024';
 
 interface AuthRequest extends Request {
   adminId?: number;

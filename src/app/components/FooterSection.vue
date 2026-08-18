@@ -10,7 +10,7 @@
               <span class="text-white font-heading font-black text-lg">A</span>
             </div>
             <div>
-              <div class="font-heading font-black text-lg leading-tight">APEX BALL</div>
+              <div class="font-heading font-black text-lg leading-tight">Yu</div>
               <div class="text-[10px] text-gray-500 tracking-widest">SPORTS EQUIPMENT</div>
             </div>
           </div>
@@ -43,7 +43,7 @@
           <ul class="space-y-3">
             <li class="flex items-center gap-2 text-gray-400 text-sm">
               <svg class="w-4 h-4 shrink-0 text-[#DC2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              info@apexball.com
+              info@yu.com
             </li>
             <li class="flex items-center gap-2 text-gray-400 text-sm">
               <svg class="w-4 h-4 shrink-0 text-[#DC2626]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
@@ -61,7 +61,7 @@
     <!-- Bottom Bar -->
     <div class="border-t border-gray-800">
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p class="text-gray-500 text-xs">&copy; 2024 APEX BALL. All rights reserved.</p>
+        <p class="text-gray-500 text-xs">&copy; 2024 Yu. All rights reserved.</p>
         <div class="flex items-center gap-4 text-gray-500 text-xs">
           <span>Privacy Policy</span>
           <span>Terms of Service</span>

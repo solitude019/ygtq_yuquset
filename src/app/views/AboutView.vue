@@ -20,13 +20,13 @@
             </div>
             <h2 class="font-heading font-black text-3xl text-[#1A1A1A] mb-6">BORN FROM A PASSION FOR BALL SPORTS</h2>
             <div class="space-y-4 text-[#666] leading-relaxed">
-              <p>Founded with a singular vision: to create the world's finest ball sports equipment. APEX BALL emerged from the belief that every athlete deserves gear that matches their dedication and skill.</p>
+              <p>Founded with a singular vision: to create the world's finest ball sports equipment. Yu emerged from the belief that every athlete deserves gear that matches their dedication and skill.</p>
               <p>Our team of engineers, designers, and former professional athletes work tirelessly to develop products that push the boundaries of performance. From material selection to final testing, every step is guided by our commitment to excellence.</p>
-              <p>Today, APEX BALL is trusted by athletes and teams in over 30 countries, from amateur leagues to professional championships. Our equipment has been part of countless victories, record-breaking performances, and unforgettable moments in sports history.</p>
+              <p>Today, Yu is trusted by athletes and teams in over 30 countries, from amateur leagues to professional championships. Our equipment has been part of countless victories, record-breaking performances, and unforgettable moments in sports history.</p>
             </div>
           </div>
           <div class="bg-[#F5F5F5] rounded-lg aspect-[4/3] flex items-center justify-center overflow-hidden">
-            <img src="/images/hero-banner.jpg" alt="APEX BALL" class="w-full h-full object-cover" />
+            <img src="/images/hero-banner.jpg" alt="Yu" class="w-full h-full object-cover" />
           </div>
         </div>
       </div>

@@ -114,7 +114,7 @@
     <section class="py-16 bg-white">
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <h2 class="font-heading font-bold text-2xl text-[#1A1A1A]">WHY APEX BALL</h2>
+          <h2 class="font-heading font-bold text-2xl text-[#1A1A1A]">WHY Yu</h2>
           <div class="w-12 h-1 bg-[#DC2626] mt-2 mx-auto"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">

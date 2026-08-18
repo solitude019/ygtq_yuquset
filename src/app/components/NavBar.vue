@@ -26,7 +26,7 @@
               <span class="text-white font-heading font-black text-lg">A</span>
             </div>
             <div class="flex flex-col">
-              <span class="font-heading font-black text-xl text-[#1A1A1A] tracking-tight leading-tight">APEX BALL</span>
+              <span class="font-heading font-black text-xl text-[#1A1A1A] tracking-tight leading-tight">Yu</span>
               <span class="text-[10px] text-[#999] tracking-widest leading-tight">SPORTS EQUIPMENT</span>
             </div>
           </router-link>
