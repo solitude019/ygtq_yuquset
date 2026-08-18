@@ -22,7 +22,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold py-3 px-8 rounded transition-all duration-200 hover:shadow-md active:scale-[0.98];
+    @apply bg-[#DC2626] hover:bg-[#B91C1C] text-white font-semibold py-3 px-8 rounded transition-all duration-200 hover:shadow-md active:scale-[0.98];
   }
 
   .btn-secondary {
@@ -38,7 +38,7 @@
   }
 
   .input-field {
-    @apply w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-[#F97316] focus:ring-1 focus:ring-[#F97316] transition-all duration-200 text-sm;
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-[#DC2626] focus:ring-1 focus:ring-[#DC2626] transition-all duration-200 text-sm;
   }
 }
 

@@ -13,8 +13,8 @@
 
 ### 色彩
 - 主色: Deep Black #0A0A0A (导航栏/深色背景，力量感)
-- 强调色: Electric Orange #F97316 (CTA/高亮，运动能量)
-- 强调色深: #EA580C (悬停状态)
+- 强调色: Racing Red #DC2626 (CTA/高亮，运动能量)
+- 强调色深: #B91C1C (悬停状态)
 - 背景色: Pure White #FFFFFF / Light Gray #F5F5F5
 - 文字色: Dark #1A1A1A / Medium #666666 / Light #999999
 - 分割线: #E5E5E5

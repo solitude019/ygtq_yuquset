@@ -4,9 +4,9 @@
     <div class="bg-[#F5F5F5] py-3">
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-2 text-xs text-[#999]">
-          <router-link to="/" class="hover:text-[#F97316]">Home</router-link>
+          <router-link to="/" class="hover:text-[#DC2626]">Home</router-link>
           <span>/</span>
-          <router-link to="/products" class="hover:text-[#F97316]">Products</router-link>
+          <router-link to="/products" class="hover:text-[#DC2626]">Products</router-link>
           <span>/</span>
           <span class="text-[#1A1A1A]">{{ product?.name || '...' }}</span>
         </div>
@@ -19,7 +19,7 @@
 
     <div v-else-if="!product" class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
       <p class="text-[#999]">Product not found</p>
-      <router-link to="/products" class="mt-4 inline-block text-[#F97316] font-semibold hover:underline">Back to Products</router-link>
+      <router-link to="/products" class="mt-4 inline-block text-[#DC2626] font-semibold hover:underline">Back to Products</router-link>
     </div>
 
     <div v-else class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -44,7 +44,7 @@
           <h1 class="font-heading font-black text-2xl md:text-3xl text-[#1A1A1A]">{{ product.name }}</h1>
 
           <div class="mt-4 flex items-baseline gap-3">
-            <span class="font-heading font-black text-3xl text-[#F97316]">${{ formatPrice(product.price) }}</span>
+            <span class="font-heading font-black text-3xl text-[#DC2626]">${{ formatPrice(product.price) }}</span>
             <span v-if="product.stock > 0" class="text-sm text-[#10B981] font-semibold bg-green-50 px-2 py-0.5 rounded">In Stock ({{ product.stock }})</span>
             <span v-else class="text-sm text-[#EF4444] font-semibold bg-red-50 px-2 py-0.5 rounded">Out of Stock</span>
           </div>
@@ -69,7 +69,7 @@
                 </tr>
                 <tr class="border-b border-gray-50">
                   <td class="py-2.5 text-[#999]">Price</td>
-                  <td class="py-2.5 text-[#F97316] font-bold">${{ formatPrice(product.price) }}</td>
+                  <td class="py-2.5 text-[#DC2626] font-bold">${{ formatPrice(product.price) }}</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 text-[#999]">Stock</td>
@@ -92,7 +92,7 @@
         <div class="flex items-center justify-between mb-8">
           <div>
             <h2 class="font-heading font-bold text-xl text-[#1A1A1A]">RELATED PRODUCTS</h2>
-            <div class="w-12 h-1 bg-[#F97316] mt-2"></div>
+            <div class="w-12 h-1 bg-[#DC2626] mt-2"></div>
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

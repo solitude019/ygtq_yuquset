@@ -17,7 +17,7 @@
             <div class="space-y-1">
               <button
                 class="w-full text-left px-3 py-2 rounded text-sm transition-colors"
-                :class="!selectedCategory ? 'bg-[#F97316] text-white font-semibold' : 'text-[#666] hover:bg-gray-50'"
+                :class="!selectedCategory ? 'bg-[#DC2626] text-white font-semibold' : 'text-[#666] hover:bg-gray-50'"
                 @click="selectedCategory = null"
               >
                 All Products
@@ -26,7 +26,7 @@
                 v-for="cat in categories"
                 :key="cat.id"
                 class="w-full text-left px-3 py-2 rounded text-sm transition-colors"
-                :class="selectedCategory === cat.id ? 'bg-[#F97316] text-white font-semibold' : 'text-[#666] hover:bg-gray-50'"
+                :class="selectedCategory === cat.id ? 'bg-[#DC2626] text-white font-semibold' : 'text-[#666] hover:bg-gray-50'"
                 @click="selectedCategory = cat.id"
               >
                 {{ cat.name }}
@@ -40,7 +40,7 @@
           <!-- Sort Bar -->
           <div class="flex items-center justify-between mb-6 bg-white rounded-lg px-4 py-3">
             <span class="text-sm text-[#666]">{{ filteredProducts.length }} products</span>
-            <select v-model="sortBy" class="text-sm border border-gray-200 rounded px-3 py-1.5 text-[#1A1A1A] focus:outline-none focus:border-[#F97316]">
+            <select v-model="sortBy" class="text-sm border border-gray-200 rounded px-3 py-1.5 text-[#1A1A1A] focus:outline-none focus:border-[#DC2626]">
               <option value="default">Sort by: Default</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>

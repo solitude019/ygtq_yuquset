@@ -22,7 +22,7 @@
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center gap-3 shrink-0">
-            <div class="w-10 h-10 bg-[#F97316] rounded flex items-center justify-center">
+            <div class="w-10 h-10 bg-[#DC2626] rounded flex items-center justify-center">
               <span class="text-white font-heading font-black text-lg">A</span>
             </div>
             <div class="flex flex-col">
@@ -37,13 +37,13 @@
               v-for="item in navItems"
               :key="item.to"
               :to="item.to"
-              class="relative px-4 py-5 text-sm font-semibold text-[#1A1A1A] hover:text-[#F97316] transition-colors"
-              active-class="!text-[#F97316]"
+              class="relative px-4 py-5 text-sm font-semibold text-[#1A1A1A] hover:text-[#DC2626] transition-colors"
+              active-class="!text-[#DC2626]"
             >
               {{ item.label }}
               <span
                 v-if="isActive(item.to)"
-                class="absolute bottom-0 left-4 right-4 h-0.5 bg-[#F97316]"
+                class="absolute bottom-0 left-4 right-4 h-0.5 bg-[#DC2626]"
               ></span>
             </router-link>
           </nav>
@@ -75,8 +75,8 @@
               v-for="item in navItems"
               :key="item.to"
               :to="item.to"
-              class="text-sm font-semibold text-[#1A1A1A] hover:text-[#F97316] py-3 px-4 rounded hover:bg-gray-50 transition-colors"
-              active-class="!text-[#F97316] !bg-orange-50"
+              class="text-sm font-semibold text-[#1A1A1A] hover:text-[#DC2626] py-3 px-4 rounded hover:bg-gray-50 transition-colors"
+              active-class="!text-[#DC2626] !bg-red-50"
               @click="mobileOpen = false"
             >
               {{ item.label }}

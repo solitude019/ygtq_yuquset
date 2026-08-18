@@ -15,8 +15,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div class="flex items-center gap-3 mb-6">
-              <div class="w-12 h-1 bg-[#F97316]"></div>
-              <span class="text-[#F97316] font-semibold text-sm tracking-widest uppercase">Our Story</span>
+              <div class="w-12 h-1 bg-[#DC2626]"></div>
+              <span class="text-[#DC2626] font-semibold text-sm tracking-widest uppercase">Our Story</span>
             </div>
             <h2 class="font-heading font-black text-3xl text-[#1A1A1A] mb-6">BORN FROM A PASSION FOR BALL SPORTS</h2>
             <div class="space-y-4 text-[#666] leading-relaxed">
@@ -37,7 +37,7 @@
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="font-heading font-bold text-2xl text-[#1A1A1A]">CORE VALUES</h2>
-          <div class="w-12 h-1 bg-[#F97316] mt-2 mx-auto"></div>
+          <div class="w-12 h-1 bg-[#DC2626] mt-2 mx-auto"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div v-for="value in values" :key="value.title" class="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow">
@@ -56,7 +56,7 @@
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div v-for="stat in stats" :key="stat.label">
-            <div class="font-heading font-black text-3xl md:text-4xl text-[#F97316]">{{ stat.value }}</div>
+            <div class="font-heading font-black text-3xl md:text-4xl text-[#DC2626]">{{ stat.value }}</div>
             <div class="mt-2 text-gray-400 text-sm uppercase tracking-wider">{{ stat.label }}</div>
           </div>
         </div>
@@ -68,7 +68,7 @@
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="font-heading font-bold text-2xl text-[#1A1A1A] mb-4">READY TO ELEVATE YOUR GAME?</h2>
         <p class="text-[#666] mb-8 max-w-lg mx-auto">Explore our collection of professional-grade ball sports equipment and find the perfect gear for your sport.</p>
-        <router-link to="/products" class="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold px-8 py-3 rounded transition-colors">
+        <router-link to="/products" class="inline-flex items-center gap-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white font-semibold px-8 py-3 rounded transition-colors">
           SHOP NOW
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </router-link>

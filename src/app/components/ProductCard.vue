@@ -18,11 +18,11 @@
     <!-- Info -->
     <div class="p-4">
       <p class="text-xs text-[#999] mb-1">{{ product.product_no }}</p>
-      <h3 class="font-heading font-bold text-sm text-[#1A1A1A] group-hover:text-[#F97316] transition-colors line-clamp-2 leading-tight">
+      <h3 class="font-heading font-bold text-sm text-[#1A1A1A] group-hover:text-[#DC2626] transition-colors line-clamp-2 leading-tight">
         {{ product.name }}
       </h3>
       <div class="mt-3 flex items-center justify-between">
-        <span class="font-heading font-black text-lg text-[#F97316]">${{ formatPrice(product.price) }}</span>
+        <span class="font-heading font-black text-lg text-[#DC2626]">${{ formatPrice(product.price) }}</span>
         <span v-if="product.stock > 0" class="text-xs text-[#10B981] font-medium">In Stock</span>
         <span v-else class="text-xs text-[#EF4444] font-medium">Out of Stock</span>
       </div>
