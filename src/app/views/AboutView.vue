@@ -1,83 +1,94 @@
 <template>
   <div>
-    <!-- Hero -->
-    <section class="pt-20 bg-primary text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h1 class="font-heading font-bold text-4xl md:text-5xl">About APEX BALL</h1>
-        <p class="mt-4 text-lg text-slate-300 max-w-2xl">
-          Born from a passion for ball sports, we engineer equipment that helps athletes reach their peak.
-        </p>
+    <!-- Page Header -->
+    <div class="relative bg-[#0A0A0A] text-white py-20 overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/90 to-transparent"></div>
+      <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="font-heading font-black text-4xl md:text-5xl">ABOUT US</h1>
+        <p class="mt-4 text-gray-400 max-w-xl text-lg">Driven by passion, defined by performance.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- Story -->
-    <section class="py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <!-- Brand Story -->
+    <section class="py-16 bg-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 class="font-heading font-bold text-3xl text-primary">Our Story</h2>
-            <p class="mt-6 text-slate-600 leading-relaxed">
-              Founded in 2015, APEX BALL started with a simple mission: to create the world's finest ball sports equipment. Our team of engineers, designers, and former professional athletes work together to push the boundaries of performance.
-            </p>
-            <p class="mt-4 text-slate-600 leading-relaxed">
-              Every ball we produce undergoes rigorous testing to ensure it meets the highest standards of quality, durability, and performance. From local parks to international stadiums, APEX BALL equipment is trusted by athletes worldwide.
-            </p>
-          </div>
-          <div class="bg-slate-50 rounded-2xl p-8">
-            <div class="grid grid-cols-2 gap-6">
-              <div v-for="stat in aboutStats" :key="stat.label" class="text-center">
-                <div class="font-heading font-bold text-3xl text-accent">{{ stat.value }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ stat.label }}</div>
-              </div>
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-1 bg-[#F97316]"></div>
+              <span class="text-[#F97316] font-semibold text-sm tracking-widest uppercase">Our Story</span>
             </div>
+            <h2 class="font-heading font-black text-3xl text-[#1A1A1A] mb-6">BORN FROM A PASSION FOR BALL SPORTS</h2>
+            <div class="space-y-4 text-[#666] leading-relaxed">
+              <p>Founded with a singular vision: to create the world's finest ball sports equipment. APEX BALL emerged from the belief that every athlete deserves gear that matches their dedication and skill.</p>
+              <p>Our team of engineers, designers, and former professional athletes work tirelessly to develop products that push the boundaries of performance. From material selection to final testing, every step is guided by our commitment to excellence.</p>
+              <p>Today, APEX BALL is trusted by athletes and teams in over 30 countries, from amateur leagues to professional championships. Our equipment has been part of countless victories, record-breaking performances, and unforgettable moments in sports history.</p>
+            </div>
+          </div>
+          <div class="bg-[#F5F5F5] rounded-lg aspect-[4/3] flex items-center justify-center overflow-hidden">
+            <img src="/images/hero-banner.jpg" alt="APEX BALL" class="w-full h-full object-cover" />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Values -->
-    <section class="py-20 bg-slate-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="font-heading font-bold text-3xl text-primary text-center mb-12">Our Values</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="value in values" :key="value.title" class="bg-white rounded-2xl p-8 shadow-sm">
-            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="value.icon"/>
-              </svg>
+    <!-- Core Values -->
+    <section class="py-16 bg-[#F5F5F5]">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="font-heading font-bold text-2xl text-[#1A1A1A]">CORE VALUES</h2>
+          <div class="w-12 h-1 bg-[#F97316] mt-2 mx-auto"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="value in values" :key="value.title" class="bg-white rounded-lg p-6 text-center hover:shadow-md transition-shadow">
+            <div class="w-14 h-14 mx-auto bg-[#F5F5F5] rounded-full flex items-center justify-center mb-4">
+              <span class="text-2xl">{{ value.emoji }}</span>
             </div>
-            <h3 class="font-heading font-semibold text-lg text-primary">{{ value.title }}</h3>
-            <p class="mt-2 text-slate-500 text-sm leading-relaxed">{{ value.desc }}</p>
+            <h3 class="font-heading font-bold text-[#1A1A1A] mb-2">{{ value.title }}</h3>
+            <p class="text-sm text-[#666] leading-relaxed">{{ value.desc }}</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="py-16 bg-[#0A0A0A] text-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div v-for="stat in stats" :key="stat.label">
+            <div class="font-heading font-black text-3xl md:text-4xl text-[#F97316]">{{ stat.value }}</div>
+            <div class="mt-2 text-gray-400 text-sm uppercase tracking-wider">{{ stat.label }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 bg-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="font-heading font-bold text-2xl text-[#1A1A1A] mb-4">READY TO ELEVATE YOUR GAME?</h2>
+        <p class="text-[#666] mb-8 max-w-lg mx-auto">Explore our collection of professional-grade ball sports equipment and find the perfect gear for your sport.</p>
+        <router-link to="/products" class="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold px-8 py-3 rounded transition-colors">
+          SHOP NOW
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </router-link>
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-const aboutStats = [
-  { value: '2015', label: 'Founded' },
+const values = [
+  { emoji: '🏆', title: 'Excellence', desc: 'We pursue the highest standards in every product we create, from design to delivery.' },
+  { emoji: '🔬', title: 'Innovation', desc: 'Continuous research and development to push the boundaries of sports technology.' },
+  { emoji: '🤝', title: 'Trust', desc: 'Building lasting relationships with athletes, teams, and partners through reliability.' },
+  { emoji: '🌍', title: 'Global Spirit', desc: 'Connecting athletes across continents through the universal language of sport.' },
+];
+
+const stats = [
+  { value: '2015', label: 'Year Founded' },
   { value: '50+', label: 'Products' },
   { value: '30+', label: 'Countries' },
   { value: '10K+', label: 'Athletes' },
-];
-
-const values = [
-  {
-    title: 'Quality First',
-    desc: 'Every product undergoes rigorous quality control. We use only premium materials and advanced manufacturing processes.',
-    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-  },
-  {
-    title: 'Innovation',
-    desc: 'We continuously invest in R&D to develop cutting-edge technologies that enhance athletic performance.',
-    icon: 'M13 10V3l4 4h-4m4 0v10l-4-4h4M3 12h8m-8 0a9 9 0 1118 0 9 9 0 01-18 0',
-  },
-  {
-    title: 'Global Community',
-    desc: 'We support athletes at every level, from beginners to professionals, across more than 30 countries worldwide.',
-    icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064',
-  },
 ];
 </script>

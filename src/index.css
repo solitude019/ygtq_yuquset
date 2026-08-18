@@ -1,35 +1,52 @@
+@import url('https://fonts.googleapis.cn/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply font-body text-slate-800 bg-white antialiased;
+    @apply font-body text-[#1A1A1A] bg-white antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  }
+
+  * {
+    @apply border-gray-200;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+    @apply bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold py-3 px-8 rounded transition-all duration-200 hover:shadow-md active:scale-[0.98];
   }
 
   .btn-secondary {
-    @apply bg-primary hover:bg-primary-light text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95;
+    @apply bg-[#0A0A0A] hover:bg-[#333] text-white font-semibold py-3 px-8 rounded transition-all duration-200 hover:shadow-md active:scale-[0.98];
   }
 
   .btn-outline {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200;
+    @apply border-2 border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white font-semibold py-3 px-8 rounded transition-all duration-200;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
+    @apply bg-white rounded-lg hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden;
   }
 
   .input-field {
-    @apply w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200;
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded focus:outline-none focus:border-[#F97316] focus:ring-1 focus:ring-[#F97316] transition-all duration-200 text-sm;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

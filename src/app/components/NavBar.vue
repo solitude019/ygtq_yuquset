@@ -1,67 +1,108 @@
 <template>
-  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-            <span class="text-white font-heading font-bold text-sm">AB</span>
+  <header class="fixed top-0 left-0 right-0 z-50">
+    <!-- Top Bar - Black -->
+    <div class="bg-[#0A0A0A] text-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-10 text-xs">
+          <div class="flex items-center gap-4">
+            <span class="text-gray-400">Professional Ball Sports Equipment</span>
           </div>
-          <span class="font-heading font-bold text-xl text-primary tracking-tight">APEX BALL</span>
-        </router-link>
-
-        <!-- Desktop Nav -->
-        <div class="hidden md:flex items-center gap-8">
-          <router-link
-            v-for="item in navItems"
-            :key="item.to"
-            :to="item.to"
-            class="text-sm font-medium text-slate-600 hover:text-accent transition-colors duration-200"
-            active-class="!text-accent"
-          >
-            {{ item.label }}
-          </router-link>
-        </div>
-
-        <!-- Mobile menu button -->
-        <button
-          class="md:hidden p-2 text-slate-600 hover:text-primary"
-          @click="mobileOpen = !mobileOpen"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path v-if="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Mobile Nav -->
-      <div v-if="mobileOpen" class="md:hidden pb-4 border-t border-slate-100">
-        <div class="flex flex-col gap-2 pt-4">
-          <router-link
-            v-for="item in navItems"
-            :key="item.to"
-            :to="item.to"
-            class="text-sm font-medium text-slate-600 hover:text-accent py-2 px-3 rounded-lg hover:bg-slate-50 transition-colors"
-            active-class="!text-accent !bg-orange-50"
-            @click="mobileOpen = false"
-          >
-            {{ item.label }}
-          </router-link>
+          <div class="hidden sm:flex items-center gap-4 text-gray-400">
+            <router-link to="/admin" class="hover:text-white transition-colors">Admin</router-link>
+            <span>|</span>
+            <span>EN</span>
+          </div>
         </div>
       </div>
     </div>
-  </nav>
+
+    <!-- Main Nav - White -->
+    <div class="bg-white shadow-sm">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <router-link to="/" class="flex items-center gap-3 shrink-0">
+            <div class="w-10 h-10 bg-[#F97316] rounded flex items-center justify-center">
+              <span class="text-white font-heading font-black text-lg">A</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-heading font-black text-xl text-[#1A1A1A] tracking-tight leading-tight">APEX BALL</span>
+              <span class="text-[10px] text-[#999] tracking-widest leading-tight">SPORTS EQUIPMENT</span>
+            </div>
+          </router-link>
+
+          <!-- Desktop Nav Links -->
+          <nav class="hidden md:flex items-center gap-1">
+            <router-link
+              v-for="item in navItems"
+              :key="item.to"
+              :to="item.to"
+              class="relative px-4 py-5 text-sm font-semibold text-[#1A1A1A] hover:text-[#F97316] transition-colors"
+              active-class="!text-[#F97316]"
+            >
+              {{ item.label }}
+              <span
+                v-if="isActive(item.to)"
+                class="absolute bottom-0 left-4 right-4 h-0.5 bg-[#F97316]"
+              ></span>
+            </router-link>
+          </nav>
+
+          <!-- Right Actions -->
+          <div class="flex items-center gap-3">
+            <button class="hidden sm:flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100 transition-colors text-[#666]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </button>
+            <!-- Mobile menu button -->
+            <button
+              class="md:hidden flex items-center justify-center w-9 h-9 rounded hover:bg-gray-100 transition-colors text-[#666]"
+              @click="mobileOpen = !mobileOpen"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path v-if="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div v-if="mobileOpen" class="md:hidden pb-4 border-t border-gray-100">
+          <div class="flex flex-col gap-1 pt-2">
+            <router-link
+              v-for="item in navItems"
+              :key="item.to"
+              :to="item.to"
+              class="text-sm font-semibold text-[#1A1A1A] hover:text-[#F97316] py-3 px-4 rounded hover:bg-gray-50 transition-colors"
+              active-class="!text-[#F97316] !bg-orange-50"
+              @click="mobileOpen = false"
+            >
+              {{ item.label }}
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const mobileOpen = ref(false);
 
 const navItems = [
-  { label: 'Home', to: '/' },
-  { label: 'Products', to: '/products' },
-  { label: 'About', to: '/about' },
+  { label: 'HOME', to: '/' },
+  { label: 'PRODUCTS', to: '/products' },
+  { label: 'ABOUT', to: '/about' },
 ];
+
+function isActive(path: string): boolean {
+  if (path === '/') return route.path === '/';
+  return route.path.startsWith(path);
+}
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col font-body">
     <NavBar v-if="!isAdminRoute" />
-    <main class="flex-1">
+    <main class="flex-1" :class="{ 'pt-[104px]': !isAdminRoute }">
       <router-view />
     </main>
     <FooterSection v-if="!isAdminRoute" />
