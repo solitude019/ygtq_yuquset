@@ -1,20 +1,33 @@
 import { Router, type Request, type Response } from 'express';
-import { getDb } from '../lib/supabase';
+import { getPool, type QueryRows, type DbRow } from '../lib/db';
 import { authMiddleware } from './auth';
 
 const router = Router();
 
+interface CategoryRow extends DbRow {
+  id: number;
+  name: string;
+  description: string;
+  created_at: Date | string;
+}
+
+function mapCategory(row: DbRow): CategoryRow {
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    description: String(row.description ?? ''),
+    created_at: (row.created_at as Date | string) ?? null,
+  };
+}
+
 // GET /api/categories - List all categories (public)
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .select('*')
-      .order('name');
-
-    if (error) throw new Error(`Query failed: ${error.message}`);
-    res.json({ success: true, data: data || [] });
+    const pool = getPool();
+    const [rows] = await pool.query<QueryRows>(
+      'SELECT id, name, description, created_at FROM categories ORDER BY name ASC'
+    );
+    res.json({ success: true, data: rows.map(mapCategory) });
   } catch (err) {
     console.error('Get categories error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -30,15 +43,19 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
       return;
     }
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .insert({ name, description: description || '' })
-      .select()
-      .single();
+    const pool = getPool();
+    const [result] = await pool.execute(
+      'INSERT INTO categories (name, description) VALUES (?, ?)',
+      [String(name), description ? String(description) : '']
+    );
 
-    if (error) throw new Error(`Insert failed: ${error.message}`);
-    res.status(201).json({ success: true, data });
+    const insertId = (result as { insertId: number }).insertId;
+    const [rows] = await pool.query<QueryRows>(
+      'SELECT id, name, description, created_at FROM categories WHERE id = ? LIMIT 1',
+      [insertId]
+    );
+
+    res.status(201).json({ success: true, data: mapCategory(rows[0]) });
   } catch (err) {
     console.error('Create category error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -49,25 +66,41 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates: Record<string, string> = {};
-    if (req.body.name !== undefined) updates.name = req.body.name;
-    if (req.body.description !== undefined) updates.description = req.body.description;
+    const setClauses: string[] = [];
+    const params: Array<string | number> = [];
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .update(updates)
-      .eq('id', Number(id))
-      .select()
-      .maybeSingle();
+    if (req.body.name !== undefined) {
+      setClauses.push('name = ?');
+      params.push(String(req.body.name));
+    }
+    if (req.body.description !== undefined) {
+      setClauses.push('description = ?');
+      params.push(String(req.body.description));
+    }
 
-    if (error) throw new Error(`Update failed: ${error.message}`);
-    if (!data) {
+    if (setClauses.length === 0) {
+      res.status(400).json({ error: 'No fields to update' });
+      return;
+    }
+
+    params.push(Number(id));
+    const pool = getPool();
+    const [result] = await pool.execute(
+      `UPDATE categories SET ${setClauses.join(', ')} WHERE id = ?`,
+      params
+    );
+
+    if ((result as { affectedRows: number }).affectedRows === 0) {
       res.status(404).json({ error: 'Category not found' });
       return;
     }
 
-    res.json({ success: true, data });
+    const [rows] = await pool.query<QueryRows>(
+      'SELECT id, name, description, created_at FROM categories WHERE id = ? LIMIT 1',
+      [Number(id)]
+    );
+
+    res.json({ success: true, data: mapCategory(rows[0]) });
   } catch (err) {
     console.error('Update category error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -78,14 +111,25 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const db = getDb();
+    const pool = getPool();
 
-    const { error } = await db
-      .from('categories')
-      .delete()
-      .eq('id', Number(id));
+    // Check if any products reference this category
+    const [countRows] = await pool.query<QueryRows>(
+      'SELECT COUNT(*) AS cnt FROM products WHERE category_id = ?',
+      [Number(id)]
+    );
+    const count = Number(countRows[0]?.cnt ?? 0);
+    if (count > 0) {
+      res.status(409).json({ error: 'Cannot delete category with associated products' });
+      return;
+    }
 
-    if (error) throw new Error(`Delete failed: ${error.message}`);
+    const [result] = await pool.execute('DELETE FROM categories WHERE id = ?', [Number(id)]);
+
+    if ((result as { affectedRows: number }).affectedRows === 0) {
+      res.status(404).json({ error: 'Category not found' });
+      return;
+    }
 
     res.json({ success: true, message: 'Category deleted' });
   } catch (err) {

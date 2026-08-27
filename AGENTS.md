@@ -4,7 +4,7 @@
 
 - **前端**: Vue 3 (Composition API + `<script setup>`), TypeScript, Vue Router, Pinia
 - **后端**: Node.js, Express, TypeScript
-- **数据库**: PostgreSQL (pg)
+- **数据库**: MySQL 8 (mysql2)
 - **构建工具**: Vite 7
 - **样式**: Tailwind CSS 3
 - **认证**: JWT (jsonwebtoken + bcryptjs)
@@ -23,7 +23,8 @@
 │   │   ├── auth.ts     # 认证路由 (登录/获取信息)
 │   │   ├── products.ts # 商品 CRUD 路由
 │   │   └── categories.ts # 分类 CRUD 路由
-│   ├── db.ts           # PostgreSQL 连接池
+│   ├── lib/
+│   │   └── db.ts        # MySQL 连接池 (mysql2/promise)
 │   ├── server.ts       # Express 服务入口
 │   └── vite.ts         # Vite 中间件集成
 ├── src/                # 前端源码
@@ -46,9 +47,13 @@
 
 ## 数据库
 
-- 使用 PostgreSQL，通过 `exec_sql` 工具管理
+- 使用 MySQL 8，驱动 `mysql2/promise` 连接池
+- 数据库: `yu_sports` (utf8mb4)
+- 默认连接: host=127.0.0.1 port=3306 user=root password=YuQuest@2026
+- 连接配置通过环境变量覆盖: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+- 启动脚本 `scripts/ensure-mysql.sh` 会在 dev/start 前自动启动 mysqld 并建库
 - 表: admins (管理员), categories (分类), products (商品)
-- 连接配置通过环境变量: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+- products.category_id 外键关联 categories.id (ON DELETE SET NULL)
 
 ## API 接口
 

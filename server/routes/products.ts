@@ -1,36 +1,65 @@
 import { Router, type Request, type Response } from 'express';
-import { getDb } from '../lib/supabase';
+import { getPool, type QueryRows, type DbRow } from '../lib/db';
 import { authMiddleware } from './auth';
 
 const router = Router();
+
+interface ProductRow extends DbRow {
+  id: number;
+  product_no: string;
+  name: string;
+  category_id: number | null;
+  price: number | string;
+  stock: number;
+  image_url: string;
+  description: string;
+  created_at: Date | string;
+  updated_at: Date | string;
+  category_name: string | null;
+}
+
+function mapProduct(row: DbRow): ProductRow {
+  return {
+    id: Number(row.id),
+    product_no: String(row.product_no),
+    name: String(row.name),
+    category_id: row.category_id !== null && row.category_id !== undefined ? Number(row.category_id) : null,
+    price: row.price as number | string,
+    stock: Number(row.stock ?? 0),
+    image_url: String(row.image_url ?? ''),
+    description: String(row.description ?? ''),
+    created_at: (row.created_at as Date | string) ?? null,
+    updated_at: (row.updated_at as Date | string) ?? null,
+    category_name: row.category_name !== null && row.category_name !== undefined
+      ? String(row.category_name)
+      : null,
+  };
+}
 
 // GET /api/products - List all products (public)
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { category } = req.query;
-    const db = getDb();
+    const pool = getPool();
 
-    let query = db
-      .from('products')
-      .select('*, categories(name)')
-      .order('created_at', { ascending: false });
+    let sql = `
+      SELECT p.id, p.product_no, p.name, p.category_id, p.price, p.stock,
+             p.image_url, p.description, p.created_at, p.updated_at,
+             c.name AS category_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+    `;
+    const params: unknown[] = [];
 
     if (category) {
-      query = query.eq('category_id', Number(category));
+      sql += ' WHERE p.category_id = ?';
+      params.push(Number(category));
     }
 
-    const { data, error } = await query;
-    if (error) throw new Error(`Query failed: ${error.message}`);
+    sql += ' ORDER BY p.created_at DESC';
 
-    // Flatten the nested category data
-    const products = (data || []).map((row: Record<string, unknown>) => {
-      const cat = row.categories as { name: string } | null;
-      return {
-        ...row,
-        category_name: cat?.name || null,
-        categories: undefined,
-      };
-    });
+    const [rows] = await pool.query<QueryRows>(sql, params);
+    const products = rows.map(mapProduct);
 
     res.json({ success: true, data: products });
   } catch (err) {
@@ -43,24 +72,26 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const db = getDb();
+    const pool = getPool();
 
-    const { data, error } = await db
-      .from('products')
-      .select('*, categories(name)')
-      .eq('id', Number(id))
-      .maybeSingle();
+    const [rows] = await pool.query<QueryRows>(
+      `SELECT p.id, p.product_no, p.name, p.category_id, p.price, p.stock,
+              p.image_url, p.description, p.created_at, p.updated_at,
+              c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.id = ?
+       LIMIT 1`,
+      [Number(id)]
+    );
 
-    if (error) throw new Error(`Query failed: ${error.message}`);
-    if (!data) {
+    const row = rows[0];
+    if (!row) {
       res.status(404).json({ error: 'Product not found' });
       return;
     }
 
-    const cat = data.categories as { name: string } | null;
-    const product = { ...data, category_name: cat?.name || null, categories: undefined };
-
-    res.json({ success: true, data: product });
+    res.json({ success: true, data: mapProduct(row) });
   } catch (err) {
     console.error('Get product error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -73,37 +104,46 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
     const { product_no, name, category_id, price, stock, image_url, description } =
       req.body as Record<string, unknown>;
 
-    if (!product_no || !name || price === undefined) {
+    if (!product_no || !name || price === undefined || price === null) {
       res.status(400).json({ error: 'Product number, name and price are required' });
       return;
     }
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('products')
-      .insert({
-        product_no,
-        name,
-        category_id: category_id || null,
-        price,
-        stock: stock || 0,
-        image_url: image_url || '',
-        description: description || '',
-      })
-      .select()
-      .single();
+    const pool = getPool();
+    const [result] = await pool.execute(
+      `INSERT INTO products (product_no, name, category_id, price, stock, image_url, description)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        String(product_no),
+        String(name),
+        category_id ? Number(category_id) : null,
+        Number(price),
+        stock !== undefined && stock !== null ? Number(stock) : 0,
+        image_url ? String(image_url) : '',
+        description ? String(description) : '',
+      ]
+    );
 
-    if (error) {
-      if (error.code === '23505') {
-        res.status(409).json({ error: 'Product number already exists' });
-        return;
-      }
-      throw new Error(`Insert failed: ${error.message}`);
-    }
+    const insertId = (result as { insertId: number }).insertId;
+    const [rows] = await pool.query<QueryRows>(
+      `SELECT p.id, p.product_no, p.name, p.category_id, p.price, p.stock,
+              p.image_url, p.description, p.created_at, p.updated_at,
+              c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.id = ?
+       LIMIT 1`,
+      [insertId]
+    );
 
-    res.status(201).json({ success: true, data });
+    res.status(201).json({ success: true, data: mapProduct(rows[0]) });
   } catch (err) {
+    const e = err as { code?: string; message?: string };
     console.error('Create product error:', err);
+    if (e.code === 'ER_DUP_ENTRY') {
+      res.status(409).json({ error: 'Product number already exists' });
+      return;
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -112,33 +152,63 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates: Record<string, unknown> = {};
     const fields = ['product_no', 'name', 'category_id', 'price', 'stock', 'image_url', 'description'] as const;
+
+    const setClauses: string[] = [];
+    const params: Array<string | number | null> = [];
 
     for (const field of fields) {
       if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
+        setClauses.push(`${field} = ?`);
+        const value = req.body[field];
+        if (field === 'category_id') {
+          params.push(value ? Number(value) : null);
+        } else if (field === 'price' || field === 'stock') {
+          params.push(Number(value));
+        } else {
+          params.push(String(value));
+        }
       }
     }
-    updates.updated_at = new Date().toISOString();
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('products')
-      .update(updates)
-      .eq('id', Number(id))
-      .select()
-      .maybeSingle();
+    if (setClauses.length === 0) {
+      res.status(400).json({ error: 'No fields to update' });
+      return;
+    }
 
-    if (error) throw new Error(`Update failed: ${error.message}`);
-    if (!data) {
+    setClauses.push('updated_at = NOW()');
+    params.push(Number(id));
+
+    const pool = getPool();
+    const [result] = await pool.execute(
+      `UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`,
+      params
+    );
+
+    if ((result as { affectedRows: number }).affectedRows === 0) {
       res.status(404).json({ error: 'Product not found' });
       return;
     }
 
-    res.json({ success: true, data });
+    const [rows] = await pool.query<QueryRows>(
+      `SELECT p.id, p.product_no, p.name, p.category_id, p.price, p.stock,
+              p.image_url, p.description, p.created_at, p.updated_at,
+              c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.id = ?
+       LIMIT 1`,
+      [Number(id)]
+    );
+
+    res.json({ success: true, data: mapProduct(rows[0]) });
   } catch (err) {
+    const e = err as { code?: string };
     console.error('Update product error:', err);
+    if (e.code === 'ER_DUP_ENTRY') {
+      res.status(409).json({ error: 'Product number already exists' });
+      return;
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -147,14 +217,14 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const db = getDb();
+    const pool = getPool();
 
-    const { error } = await db
-      .from('products')
-      .delete()
-      .eq('id', Number(id));
+    const [result] = await pool.execute('DELETE FROM products WHERE id = ?', [Number(id)]);
 
-    if (error) throw new Error(`Delete failed: ${error.message}`);
+    if ((result as { affectedRows: number }).affectedRows === 0) {
+      res.status(404).json({ error: 'Product not found' });
+      return;
+    }
 
     res.json({ success: true, message: 'Product deleted' });
   } catch (err) {
