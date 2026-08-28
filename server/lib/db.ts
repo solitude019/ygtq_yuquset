@@ -6,7 +6,7 @@ function createPool(): Pool {
   const options: PoolOptions = {
     host: process.env.DB_HOST || '127.0.0.1',
     port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER || 'root',
+    user: process.env.DB_USER || 'yu',
     password: process.env.DB_PASSWORD || 'YuQuest@2026',
     database: process.env.DB_NAME || 'yu_sports',
     waitForConnections: true,
