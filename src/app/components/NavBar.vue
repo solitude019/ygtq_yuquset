@@ -22,9 +22,13 @@
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center gap-3 shrink-0">
-            <div class="w-10 h-10 bg-[#DC2626] rounded flex items-center justify-center">
-              <span class="text-white font-heading font-black text-lg">A</span>
-            </div>
+            <img
+              src="/images/logo.png"
+              alt="Yu Sports"
+              class="w-11 h-11 object-contain"
+              width="44"
+              height="44"
+            />
             <div class="flex flex-col">
               <span class="font-heading font-black text-xl text-[#1A1A1A] tracking-tight leading-tight">Yu</span>
               <span class="text-[10px] text-[#999] tracking-widest leading-tight">SPORTS EQUIPMENT</span>
