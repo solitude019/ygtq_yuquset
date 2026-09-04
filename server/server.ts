@@ -5,6 +5,7 @@ import { createServer, type Server } from 'http';
 import express from 'express';
 import router from './routes/index';
 import { setupVite } from './vite';
+import { getUploadRootDir } from './lib/config';
 
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
 const port = parseInt(process.env.PORT || '5000', 10);
@@ -12,6 +13,10 @@ const app = express();
 const server = createServer(app);
 
 async function startServer(): Promise<Server> {
+  // Load config from the database (upload root dir) and ensure it exists.
+  const uploadRoot = await getUploadRootDir();
+  console.log(`[config] upload root directory: ${uploadRoot}`);
+
   // Request logging (dev only)
   if (isDev) {
     app.use((req, res, next) => {
@@ -28,8 +33,11 @@ async function startServer(): Promise<Server> {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Serve static product images
+  // Serve built-in static product images
   app.use('/images', express.static('public/images'));
+
+  // Serve locally uploaded product images from the configured root directory
+  app.use('/uploads', express.static(uploadRoot));
 
   // Register API routes
   app.use(router);

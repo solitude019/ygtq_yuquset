@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
-import { getDb } from '../lib/supabase';
+import fs from 'fs/promises';
+import path from 'path';
+import { getUploadRootDir } from '../lib/config';
 
 const router = Router();
 
@@ -10,7 +12,7 @@ const ALLOWED_TYPES: Record<string, string> = {
   'image/png': 'png',
 };
 
-// In-memory storage; buffer is uploaded to Supabase Storage
+// Files are held in memory then written to the configured local directory.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_SIZE },
@@ -23,13 +25,12 @@ const upload = multer({
   },
 });
 
-const BUCKET = 'product-images';
-
 /**
  * POST /api/upload
  * Upload a single product image (field name: "image").
- * Requires authentication (enforced at router registration).
- * Returns the public URL of the uploaded file.
+ * Files are stored locally under the upload root directory (config table,
+ * key `upload_root_dir`). Requires authentication (enforced at router registration).
+ * Returns the public URL of the uploaded file, served under /uploads/*.
  */
 router.post('/', upload.single('image'), async (req: Request, res: Response) => {
   try {
@@ -41,26 +42,17 @@ router.post('/', upload.single('image'), async (req: Request, res: Response) => 
     const ext = ALLOWED_TYPES[file.mimetype];
     const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
 
-    const db = getDb();
-    const { error: uploadError } = await db.storage
-      .from(BUCKET)
-      .upload(filename, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false,
-      });
+    // Resolve the storage root from the config table.
+    const rootDir = await getUploadRootDir();
+    await fs.mkdir(rootDir, { recursive: true });
 
-    if (uploadError) {
-      console.error('Storage upload error:', uploadError.message);
-      return res.status(500).json({ error: 'Image upload failed' });
-    }
+    const targetPath = path.join(rootDir, filename);
+    await fs.writeFile(targetPath, file.buffer);
 
-    const { data: urlData } = db.storage
-      .from(BUCKET)
-      .getPublicUrl(filename);
-
+    // Files are served statically under /uploads (see server.ts).
     return res.status(201).json({
       success: true,
-      data: { url: urlData.publicUrl, filename },
+      data: { url: `/uploads/${filename}`, filename },
     });
   } catch (error) {
     console.error('Upload handler error:', error);
@@ -83,10 +75,8 @@ router.use(
       }
       return res.status(400).json({ error: err.message });
     }
-    if (err instanceof Error) {
-      return res.status(400).json({ error: err.message });
-    }
-    return res.status(500).json({ error: 'Upload failed' });
+    const message = err instanceof Error ? err.message : 'Upload failed';
+    return res.status(400).json({ error: message });
   },
 );
 
