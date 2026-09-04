@@ -6,14 +6,8 @@
         <!-- Brand -->
         <div>
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 bg-white rounded flex items-center justify-center shrink-0">
-              <img
-                src="/images/logo.png"
-                alt="Yu Sports"
-                class="w-9 h-9 object-contain"
-                width="36"
-                height="36"
-              />
+            <div class="w-10 h-10 bg-[#DC2626] rounded flex items-center justify-center">
+              <span class="text-white font-heading font-black text-lg">A</span>
             </div>
             <div>
               <div class="font-heading font-black text-lg leading-tight">Yu</div>

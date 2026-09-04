@@ -1,17 +1,17 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getPool, type QueryRows, type DbRow } from '../lib/db';
+import { getDb } from '../lib/supabase';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'yu-secret-key-2024';
 
-export interface AuthRequest extends Request {
+interface AuthRequest extends Request {
   adminId?: number;
   adminUsername?: string;
 }
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ error: 'No token provided' });
@@ -38,26 +38,27 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const pool = getPool();
-    const [rows] = await pool.query<QueryRows>(
-      'SELECT id, username, password_hash FROM admins WHERE username = ? LIMIT 1',
-      [username]
-    );
+    const db = getDb();
+    const { data, error } = await db
+      .from('admins')
+      .select('id, username, password_hash')
+      .eq('username', username)
+      .maybeSingle();
 
-    const admin = rows[0] as DbRow | undefined;
-    if (!admin) {
+    if (error) throw new Error(`Query failed: ${error.message}`);
+    if (!data) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
-    const validPassword = await bcrypt.compare(password, String(admin.password_hash));
+    const validPassword = await bcrypt.compare(password, data.password_hash);
     if (!validPassword) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
     const token = jwt.sign(
-      { id: Number(admin.id), username: String(admin.username) },
+      { id: data.id, username: data.username },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -66,7 +67,7 @@ router.post('/login', async (req: Request, res: Response) => {
       success: true,
       data: {
         token,
-        admin: { id: Number(admin.id), username: String(admin.username) },
+        admin: { id: data.id, username: data.username },
       },
     });
   } catch (err) {
@@ -90,4 +91,5 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 });
 
+export { authMiddleware };
 export default router;
