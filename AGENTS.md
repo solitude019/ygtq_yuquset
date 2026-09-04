@@ -51,7 +51,7 @@
 - 数据库: `yu_sports` (utf8mb4)
 - 默认连接: host=127.0.0.1 port=3306 user=yu password=YuQuest@2026
 - 连接配置通过环境变量覆盖: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
-- 启动脚本 `scripts/ensure-mysql.sh` 会在 dev/start 前自动启动 mysqld 并建库
+- 启动脚本 `scripts/ensure-mysql.sh` 会在 dev/start 前自动启动 mysqld；并调用 `scripts/init-db.js` 幂等创建 `yu` 用户、`yu_sports` 库、表结构与种子数据（admin/admin123、7 分类、9 商品）
 - 表: admins (管理员), categories (分类), products (商品)
 - products.category_id 外键关联 categories.id (ON DELETE SET NULL)
 
