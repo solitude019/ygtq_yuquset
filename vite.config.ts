@@ -2,6 +2,11 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
+// In this project Express handles both the API (/api) and the Vite dev
+// middleware on a single port (5000, see server/vite.ts). Therefore there is
+// NO separate Vite dev-server proxy to another backend. Setting a proxy or a
+// fixed HMR port breaks hot reload / connectivity behind the preview tunnel,
+// so the Vite server config is intentionally minimal here.
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -10,25 +15,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5000,
     host: '0.0.0.0',
+    port: 5000,
     allowedHosts: true,
-    hmr: {
-      overlay: true,
-      path: '/hot/vite-hmr',
-      port: 6000,
-      clientPort: 443,
-      timeout: 30000,
-    },
     watch: {
       usePolling: true,
       interval: 100,
-    },
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
     },
   },
   build: {

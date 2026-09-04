@@ -29,11 +29,11 @@ export async function setupViteMiddleware(app: Application) {
       host: '0.0.0.0',
       port: 5000,
       middlewareMode: true,
+      // Run HMR over the same port as HTTP so it works behind the preview
+      // tunnel/proxy. Do NOT hardcode a separate port or clientPort (that
+      // breaks the websocket upgrade on the shared preview endpoint).
       hmr: {
         path: '/hot/vite-hmr',
-        port: 6000,
-        clientPort: 443,
-        timeout: 30000,
       },
       watch: {
         usePolling: true,
