@@ -25,9 +25,10 @@ export async function setupViteMiddleware(app: Application) {
         '@': path.resolve(process.cwd(), 'src'),
       },
     },
+    // middlewareMode: Vite does NOT open its own TCP listener here;
+    // the single HTTP listener is server.listen() in server.ts.
     server: {
       host: '0.0.0.0',
-      port: 8080,
       middlewareMode: true,
       hmr: {
         path: '/hot/vite-hmr',

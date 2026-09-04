@@ -8,9 +8,25 @@ import router from './routes/index';
 import { setupVite } from './vite';
 import { getUploadRootDir } from './lib/config';
 
-// In the Coze sandbox the port comes from PORT; on Aliyun prefer DEPLOY_RUN_PORT/PORT, default 8080.
+// There is exactly ONE HTTP listener in the whole app (see server.listen below).
+// Port resolution:
+//   - Production (Aliyun, COZE_PROJECT_ENV=PROD): use PORT, default 8080.
+//     It deliberately does NOT read DEPLOY_RUN_PORT, so it can never fall back to 5000.
+//   - Dev (Coze sandbox): use PORT -> DEPLOY_RUN_PORT (injected, usually 5000) -> 5000.
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
-const port = parseInt(process.env.PORT || process.env.DEPLOY_RUN_PORT || '8080', 10);
+const DEFAULT_DEV_PORT = 5000;
+const DEFAULT_PROD_PORT = 8080;
+
+const portStr =
+  process.env.PORT ||
+  (isDev ? process.env.DEPLOY_RUN_PORT : undefined) ||
+  String(isDev ? DEFAULT_DEV_PORT : DEFAULT_PROD_PORT);
+const port = Number.parseInt(portStr, 10);
+
+if (Number.isNaN(port) || port <= 0 || port > 65535) {
+  console.error(`[fatal] Invalid PORT value: "${portStr}". Must be 1-65535.`);
+  process.exit(1);
+}
 const app = express();
 const server = createServer(app);
 
@@ -57,7 +73,15 @@ async function startServer(): Promise<Server> {
   });
 
   server.once('error', err => {
-    console.error('Server error:', err);
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'EADDRINUSE') {
+      console.error(
+        `[fatal] Port ${port} is already in use (EADDRINUSE). ` +
+          `Stop the other process or set a different PORT in .env, then restart.`
+      );
+    } else {
+      console.error('Server error:', err);
+    }
     process.exit(1);
   });
 
