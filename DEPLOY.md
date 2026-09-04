@@ -12,7 +12,7 @@
 | 数据库名 | `yu_sports` |
 | 数据库用户 | `yu` |
 | 数据库密码 | `YuQuest@2026` |
-| 应用监听端口 | `5000`（Nginx 对外 80/443） |
+| 应用监听端口 | `8080`（Nginx 对外 80/443） |
 | 管理员账号 | `admin` / `ygtq@18618437055` |
 
 > 目录关系：代码在 `/opt/ygtq/ygtq_yuquest`，图片在其**同级**目录 `/opt/ygtq/product`。后端默认会自动把上传目录解析为「项目同级 `product` 目录」，也可用环境变量 `UPLOAD_ROOT_DIR` 显式覆盖。
@@ -151,7 +151,7 @@ vi .env
 
 ```ini
 # 服务端口
-PORT=5000
+PORT=8080
 # 生产模式（关键：值为 PROD 时才会托管 dist/client 静态前端）
 COZE_PROJECT_ENV=PROD
 
@@ -218,7 +218,7 @@ cd /opt/ygtq/ygtq_yuquest
 COZE_PROJECT_ENV=PROD pm2 start "pnpm start:prod" --name ygtq_yuquest
 ```
 
-`start:prod` 实际执行 `tsx server/server.ts`，会读取 `.env`、连接 MySQL、监听 5000 端口并托管 `dist/client`。
+`start:prod` 实际执行 `tsx server/server.ts`，会读取 `.env`、连接 MySQL、监听 8080 端口并托管 `dist/client`。
 
 ### 2. 设置开机自启
 
@@ -239,14 +239,14 @@ pm2 logs ygtq_yuquest --lines 50
 ```
 [config] upload root directory: /opt/ygtq/product
 Serving static files from dist/client/
-Server running on http://0.0.0.0:5000 [PROD]
+Server running on http://0.0.0.0:8080 [PROD]
 ```
 
 ### 4. 本机自测
 
 ```bash
-curl -s http://127.0.0.1:5000/api/products | head
-curl -I  http://127.0.0.1:5000/
+curl -s http://127.0.0.1:8080/api/products | head
+curl -I  http://127.0.0.1:8080/
 ```
 
 ---
@@ -269,7 +269,7 @@ server {
     client_max_body_size 10m;       # 允许上传图片（≤5MB），留余量
 
     location / {
-        proxy_pass http://127.0.0.1:5000;   # 端口与 .env 的 PORT 保持一致
+        proxy_pass http://127.0.0.1:8080;   # 端口与 .env 的 PORT 保持一致
         proxy_http_version 1.1;
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
@@ -310,7 +310,7 @@ server {
     client_max_body_size 10m;   # 允许上传图片（≤5MB），留余量
 
     location / {
-        proxy_pass http://127.0.0.1:5000;   # 端口与 .env 的 PORT 保持一致
+        proxy_pass http://127.0.0.1:8080;   # 端口与 .env 的 PORT 保持一致
         proxy_http_version 1.1;
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
@@ -334,7 +334,7 @@ server {
 }
 ```
 
-> 关键点：`proxy_pass` 的端口必须与 `.env` 中 `PORT` 一致（如把应用改成 8080，这里也要写 8080）。
+> 关键点：`proxy_pass` 的端口必须与 `.env` 中 `PORT` 一致（本项目生产固定为 `8080`）。
 
 测试并重载：
 
@@ -350,7 +350,7 @@ systemctl reload nginx
 
 ## 十、开放防火墙 / 安全组
 
-1. **阿里云控制台 → ECS → 安全组**：放行入方向 **80**（HTTP）、**443**（HTTPS）。不要对外暴露 5000、3306。
+1. **阿里云控制台 → ECS → 安全组**：放行入方向 **80**（HTTP）、**443**（HTTPS）。不要对外暴露 8080、3306。
 2. 服务器本机防火墙（若开启 firewalld）：
 
 ```bash
@@ -407,7 +407,7 @@ mysqldump -u yu -p'YuQuest@2026' yu_sports > /opt/ygtq/backup_$(date +%F).sql
 
 | 现象 | 排查 |
 | --- | --- |
-| 页面 502 | 应用未起或 5000 未监听：`pm2 logs ygtq_yuquest`、`curl 127.0.0.1:5000` |
+| 页面 502 | 应用未起或 8080 未监听：`pm2 logs ygtq_yuquest`、`curl 127.0.0.1:8080` |
 | 接口报数据库错误 | 核对 `.env` 的 `DB_*`；确认 `yu_sports` 已建、用户已授权、已导入 `schema.sql` |
 | 前端能开但数据为空 | 未导入种子数据或连错库；执行第六步 |
 | 上传图片失败/不显示 | 确认 `/opt/ygtq/product` 存在且可写；`UPLOAD_ROOT_DIR` 正确；Nginx `client_max_body_size` 足够大 |
