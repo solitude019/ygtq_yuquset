@@ -1,5 +1,5 @@
 {
-  "name": "projects",
+  "name": "ygtq_yuquest",
   "version": "1.0.0",
   "description": "Vanilla TypeScript application with Express + Vite (HTML + CSS + TS + Node API)",
   "scripts": {

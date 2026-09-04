@@ -13,7 +13,7 @@ const cache = new Map<string, string>();
 
 function defaultUploadRoot(): string {
   // Files are stored in a sibling `product` directory of the project.
-  // e.g. project at /opt/ygtq/yuquest  ->  uploads at /opt/ygtq/product
+  // e.g. project at /opt/ygtq/ygtq_yuquest  ->  uploads at /opt/ygtq/product
   const projectRoot = process.env.COZE_WORKSPACE_PATH || process.cwd();
   return path.resolve(projectRoot, '..', 'product');
 }

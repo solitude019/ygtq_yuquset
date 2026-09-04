@@ -6,15 +6,16 @@
 
 | 项目 | 值 |
 | --- | --- |
-| 项目代码路径 | `/opt/ygtq/yuquest` |
+| 工程名 | `ygtq_yuquest`（`package.json` name） |
+| 项目代码路径 | `/opt/ygtq/ygtq_yuquest` |
 | 产品图片存储路径 | `/opt/ygtq/product` |
 | 数据库名 | `yu_sports` |
 | 数据库用户 | `yu` |
-| 数据库密码 | |
+| 数据库密码 | `YuQuest@2026` |
 | 应用监听端口 | `5000`（Nginx 对外 80/443） |
 | 管理员账号 | `admin` / `ygtq@18618437055` |
 
-> 目录关系：代码在 `/opt/ygtq/yuquest`，图片在其**同级**目录 `/opt/ygtq/product`。后端默认会自动把上传目录解析为「项目同级 `product` 目录」，也可用环境变量 `UPLOAD_ROOT_DIR` 显式覆盖。
+> 目录关系：代码在 `/opt/ygtq/ygtq_yuquest`，图片在其**同级**目录 `/opt/ygtq/product`。后端默认会自动把上传目录解析为「项目同级 `product` 目录」，也可用环境变量 `UPLOAD_ROOT_DIR` 显式覆盖。
 
 ---
 
@@ -106,7 +107,7 @@ EXIT;
 ### 1. 创建目录
 
 ```bash
-mkdir -p /opt/ygtq/yuquest      # 项目代码
+mkdir -p /opt/ygtq/ygtq_yuquest      # 项目代码
 mkdir -p /opt/ygtq/product      # 产品图片
 ```
 
@@ -116,14 +117,14 @@ mkdir -p /opt/ygtq/product      # 产品图片
 
 ```bash
 # 方式 A：scp（在本地执行）
-scp -r ./yuquest/* root@<服务器公网IP>:/opt/ygtq/yuquest/
+scp -r ./ygtq_yuquest/* root@<服务器公网IP>:/opt/ygtq/ygtq_yuquest/
 
 # 方式 B：rsync（推荐，可增量同步）
 rsync -avz --exclude node_modules --exclude dist --exclude .env \
-  ./yuquest/ root@<服务器公网IP>:/opt/ygtq/yuquest/
+  ./ygtq_yuquest/ root@<服务器公网IP>:/opt/ygtq/ygtq_yuquest/
 ```
 
-> 也可先 `git clone` 仓库到 `/opt/ygtq/yuquest`。
+> 也可先 `git clone` 仓库到 `/opt/ygtq/ygtq_yuquest`。
 
 ### 3. 设置图片目录权限
 
@@ -141,7 +142,7 @@ chmod -R 755 /opt/ygtq/product
 进入项目目录，由示例文件生成 `.env`：
 
 ```bash
-cd /opt/ygtq/yuquest
+cd /opt/ygtq/ygtq_yuquest
 cp .env.example .env
 vi .env
 ```
@@ -177,7 +178,7 @@ UPLOAD_ROOT_DIR=/opt/ygtq/product
 项目根目录已提供 `schema.sql`（含建表、管理员账号、分类、示例商品、上传目录配置）。
 
 ```bash
-cd /opt/ygtq/yuquest
+cd /opt/ygtq/ygtq_yuquest
 mysql -u yu -p yu_sports < schema.sql
 # 提示输入密码：YuQuest@2026
 ```
@@ -195,7 +196,7 @@ mysql -u yu -p -e "USE yu_sports; SHOW TABLES; SELECT username FROM admins;"
 ## 七、安装依赖并构建前端
 
 ```bash
-cd /opt/ygtq/yuquest
+cd /opt/ygtq/ygtq_yuquest
 
 # 安装全部依赖（生产用 tsx 直接运行 TS，tsx 在 devDependencies 中，因此不要加 --prod）
 pnpm install
@@ -213,8 +214,8 @@ pnpm build:client
 ### 1. 用 pm2 启动
 
 ```bash
-cd /opt/ygtq/yuquest
-COZE_PROJECT_ENV=PROD pm2 start "pnpm start:prod" --name yuquest
+cd /opt/ygtq/ygtq_yuquest
+COZE_PROJECT_ENV=PROD pm2 start "pnpm start:prod" --name ygtq_yuquest
 ```
 
 `start:prod` 实际执行 `tsx server/server.ts`，会读取 `.env`、连接 MySQL、监听 5000 端口并托管 `dist/client`。
@@ -230,7 +231,7 @@ pm2 startup        # 按提示执行它输出的那条命令
 
 ```bash
 pm2 status
-pm2 logs yuquest --lines 50
+pm2 logs ygtq_yuquest --lines 50
 ```
 
 正常应看到：
@@ -255,7 +256,7 @@ curl -I  http://127.0.0.1:5000/
 新建站点配置：
 
 ```bash
-vi /etc/nginx/conf.d/yuquest.conf
+vi /etc/nginx/conf.d/ygtq_yuquest.conf
 ```
 
 写入（把 `your-domain.com` 换成你的域名或公网 IP；暂无域名可先用 `_` 兜底）：
@@ -325,18 +326,18 @@ firewall-cmd --reload
 ```bash
 # 查看服务状态 / 日志
 pm2 status
-pm2 logs yuquest
+pm2 logs ygtq_yuquest
 
 # 更新代码后重新发布
-cd /opt/ygtq/yuquest
+cd /opt/ygtq/ygtq_yuquest
 git pull            # 或重新 rsync 上传
 pnpm install        # 依赖有变化时
 pnpm build:client
-pm2 restart yuquest
+pm2 restart ygtq_yuquest
 
 # 停止 / 删除
-pm2 stop yuquest
-pm2 delete yuquest
+pm2 stop ygtq_yuquest
+pm2 delete ygtq_yuquest
 ```
 
 ### 数据库备份（建议加入定时任务）
@@ -355,7 +356,7 @@ mysqldump -u yu -p'YuQuest@2026' yu_sports > /opt/ygtq/backup_$(date +%F).sql
 
 | 现象 | 排查 |
 | --- | --- |
-| 页面 502 | 应用未起或 5000 未监听：`pm2 logs yuquest`、`curl 127.0.0.1:5000` |
+| 页面 502 | 应用未起或 5000 未监听：`pm2 logs ygtq_yuquest`、`curl 127.0.0.1:5000` |
 | 接口报数据库错误 | 核对 `.env` 的 `DB_*`；确认 `yu_sports` 已建、用户已授权、已导入 `schema.sql` |
 | 前端能开但数据为空 | 未导入种子数据或连错库；执行第六步 |
 | 上传图片失败/不显示 | 确认 `/opt/ygtq/product` 存在且可写；`UPLOAD_ROOT_DIR` 正确；Nginx `client_max_body_size` 足够大 |
