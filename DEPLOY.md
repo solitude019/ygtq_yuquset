@@ -259,41 +259,92 @@ curl -I  http://127.0.0.1:5000/
 vi /etc/nginx/conf.d/ygtq_yuquest.conf
 ```
 
-写入（把 `your-domain.com` 换成你的域名或公网 IP；暂无域名可先用 `_` 兜底）：
+### 9.1 仅 HTTP（快速验证，暂无证书时）
 
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;   # 或 _;
+    server_name www.yuquest.com;   # 暂无域名可用 _;
 
     client_max_body_size 10m;       # 允许上传图片（≤5MB），留余量
 
     location / {
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:5000;   # 端口与 .env 的 PORT 保持一致
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
+### 9.2 配置 HTTPS（正式上线，使用已有 SSL 证书）
+
+本项目证书路径：`/etc/ssl/certs/www.yuquest.com.pem` 与 `/etc/ssl/certs/www.yuquest.com.key`。
+先确认 Nginx 可读取：`chmod 644 *.pem; chmod 600 *.key`。
+
+```nginx
+# HTTP -> 强制跳转 HTTPS
+server {
+    listen 80;
+    server_name www.yuquest.com yuquest.com;
+    location /.well-known/acme-challenge/ { root /usr/share/nginx/html; }
+    location / { return 301 https://www.yuquest.com$request_uri; }
+}
+
+# HTTPS 主站点
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name www.yuquest.com;
+
+    ssl_certificate     /etc/ssl/certs/www.yuquest.com.pem;
+    ssl_certificate_key /etc/ssl/certs/www.yuquest.com.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    client_max_body_size 10m;   # 允许上传图片（≤5MB），留余量
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;   # 端口与 .env 的 PORT 保持一致
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_read_timeout    120s;
+        proxy_send_timeout    120s;
+    }
+}
+
+# 裸域跳 www（若证书仅签了 www，可删除本段）
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name yuquest.com;
+    ssl_certificate     /etc/ssl/certs/www.yuquest.com.pem;
+    ssl_certificate_key /etc/ssl/certs/www.yuquest.com.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    return 301 https://www.yuquest.com$request_uri;
+}
+```
+
+> 关键点：`proxy_pass` 的端口必须与 `.env` 中 `PORT` 一致（如把应用改成 8080，这里也要写 8080）。
+
 测试并重载：
 
 ```bash
-nginx -t
+nginx -t          # 语法 + 证书路径校验，必须 successful
 systemctl reload nginx
 ```
 
-> 图片上传走 `/api/upload`，上传后通过 `/uploads/文件名` 访问，Nginx 已整体反代到 5000，无需额外配置。
-
-### （可选）配置 HTTPS
-
-```bash
-yum install -y certbot python3-certbot-nginx   # Ubuntu 用 apt
-certbot --nginx -d your-domain.com
-```
+> 图片上传走 `/api/upload`，上传后通过 `/uploads/文件名` 访问，Nginx 已整体反代到应用，无需额外配置。
+> 若改用 certbot 自动签发：`yum install -y certbot python3-certbot-nginx && certbot --nginx -d www.yuquest.com`。
 
 ---
 
