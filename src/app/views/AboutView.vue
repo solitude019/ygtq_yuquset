@@ -26,7 +26,7 @@
             </div>
           </div>
           <div class="bg-[#F5F5F5] rounded-lg aspect-[4/3] flex items-center justify-center overflow-hidden">
-            <img src="/images/hero-banner.jpg" alt="Yu" class="w-full h-full object-cover" />
+            <img src="/images/hero-badminton-1.jpg" alt="Yu" class="w-full h-full object-cover" />
           </div>
         </div>
       </div>
