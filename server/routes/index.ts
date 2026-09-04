@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import authRoutes from './auth';
+import authRoutes, { authMiddleware } from './auth';
 import productRoutes from './products';
 import categoryRoutes from './categories';
+import uploadRoutes from './upload';
 
 const router = Router();
 
@@ -18,5 +19,8 @@ router.get('/api/health', (_req, res) => {
 router.use('/api/auth', authRoutes);
 router.use('/api/products', productRoutes);
 router.use('/api/categories', categoryRoutes);
+
+// Protected upload route (requires Bearer token)
+router.use('/api/upload', authMiddleware, uploadRoutes);
 
 export default router;

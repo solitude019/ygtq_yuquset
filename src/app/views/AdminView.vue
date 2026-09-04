@@ -210,8 +210,27 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-              <input v-model="productForm.image_url" class="input-field" placeholder="https://example.com/image.jpg" />
+              <label class="block text-sm font-medium text-slate-700 mb-1">Product Image</label>
+              <div class="flex items-start gap-4">
+                <!-- Preview -->
+                <div class="w-24 h-24 rounded-lg border border-slate-200 bg-slate-50 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                  <img v-if="productForm.image_url" :src="productForm.image_url" alt="preview" class="w-full h-full object-cover" />
+                  <span v-else class="text-xs text-slate-400 text-center px-1">No image</span>
+                </div>
+                <!-- Upload area -->
+                <div class="flex-1">
+                  <input ref="fileInputRef" type="file" accept="image/jpeg,image/png" class="hidden" @change="handleFileSelect" />
+                  <button type="button" @click="triggerFileSelect" :disabled="uploading"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {{ uploading ? 'Uploading...' : (productForm.image_url ? 'Replace Image' : 'Upload Image') }}
+                  </button>
+                  <p class="text-xs text-slate-400 mt-2">JPG or PNG, max 5MB</p>
+                  <p v-if="uploadError" class="text-xs text-red-600 mt-1">{{ uploadError }}</p>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
@@ -338,6 +357,46 @@ const productForm = reactive({
 const formError = ref('');
 const saving = ref(false);
 
+// Image upload
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const uploading = ref(false);
+const uploadError = ref('');
+
+function triggerFileSelect(): void {
+  uploadError.value = '';
+  fileInputRef.value?.click();
+}
+
+async function handleFileSelect(e: Event): void {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  // Client-side validation
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    uploadError.value = 'Only JPG or PNG images are allowed.';
+    input.value = '';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    uploadError.value = 'Image size must not exceed 5MB.';
+    input.value = '';
+    return;
+  }
+
+  uploadError.value = '';
+  uploading.value = true;
+  try {
+    const url = await apiClient.uploadProductImage(authStore.token, file);
+    productForm.image_url = url;
+  } catch (err) {
+    uploadError.value = err instanceof Error ? err.message : 'Upload failed';
+  } finally {
+    uploading.value = false;
+    input.value = '';
+  }
+}
+
 // Category form
 const showCategoryForm = ref(false);
 const editingCategory = ref<Category | null>(null);
@@ -373,6 +432,8 @@ async function loadData(): Promise<void> {
 function openProductForm(product: Product | null): void {
   editingProduct.value = product;
   formError.value = '';
+  uploadError.value = '';
+  uploading.value = false;
   if (product) {
     Object.assign(productForm, {
       product_no: product.product_no,

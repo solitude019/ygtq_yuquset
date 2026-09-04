@@ -121,6 +121,22 @@ export const apiClient = {
     });
   },
 
+  // Upload a product image (multipart/form-data). Returns public URL.
+  async uploadProductImage(token: string, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await fetch(`${BASE_URL}/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }, // no Content-Type; browser sets boundary
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error || 'Upload failed');
+    }
+    return data.data.url as string;
+  },
+
   // Categories (admin)
   createCategory(token: string, data: { name: string; description: string }): Promise<Category> {
     return request<Category>('/categories', {
