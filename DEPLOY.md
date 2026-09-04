@@ -88,8 +88,8 @@ mysql -u root -p
 CREATE DATABASE IF NOT EXISTS `yu_sports`
   DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
 
-CREATE USER IF NOT EXISTS 'yu'@'localhost' IDENTIFIED BY 'YuQuest2026';
-CREATE USER IF NOT EXISTS 'yu'@'127.0.0.1' IDENTIFIED BY 'YuQuest2026';
+CREATE USER IF NOT EXISTS 'yu'@'localhost' IDENTIFIED BY 'YuQuest@2026';
+CREATE USER IF NOT EXISTS 'yu'@'127.0.0.1' IDENTIFIED BY 'YuQuest@2026';
 
 GRANT ALL PRIVILEGES ON `yu_sports`.* TO 'yu'@'localhost';
 GRANT ALL PRIVILEGES ON `yu_sports`.* TO 'yu'@'127.0.0.1';
@@ -162,7 +162,7 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=yu_sports
 DB_USER=yu
-DB_PASSWORD=YuQuest2026
+DB_PASSWORD=YuQuest@2026
 
 # 产品图片上传根目录（显式指定，与项目同级的 product 目录）
 UPLOAD_ROOT_DIR=/opt/ygtq/product
@@ -179,7 +179,7 @@ UPLOAD_ROOT_DIR=/opt/ygtq/product
 ```bash
 cd /opt/ygtq/yuquest
 mysql -u yu -p yu_sports < schema.sql
-# 提示输入密码：YuQuest2026
+# 提示输入密码：YuQuest@2026
 ```
 
 验证：
@@ -342,7 +342,7 @@ pm2 delete yuquest
 ### 数据库备份（建议加入定时任务）
 
 ```bash
-mysqldump -u yu -p'YuQuest2026' yu_sports > /opt/ygtq/backup_$(date +%F).sql
+mysqldump -u yu -p'YuQuest@2026' yu_sports > /opt/ygtq/backup_$(date +%F).sql
 ```
 
 ### 图片备份
