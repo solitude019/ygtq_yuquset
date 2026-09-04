@@ -192,7 +192,7 @@ function nextSlide() {
 }
 
 onMounted(async () => {
-  slideInterval = setInterval(nextSlide, 5000);
+  slideInterval = setInterval(nextSlide, 8080);
   try {
     const [productsData, categoriesData] = await Promise.all([
       apiClient.getProducts(),

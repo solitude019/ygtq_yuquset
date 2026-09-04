@@ -27,7 +27,7 @@ export async function setupViteMiddleware(app: Application) {
     },
     server: {
       host: '0.0.0.0',
-      port: 5000,
+      port: 8080,
       middlewareMode: true,
       hmr: {
         path: '/hot/vite-hmr',

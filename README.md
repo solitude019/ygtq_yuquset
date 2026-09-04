@@ -70,7 +70,7 @@ coze start
   - 运行 `server/server.ts` 启动 Express 服务器
   - Vite 以 middleware 模式集成到 Express
   - 前端支持 HMR（热模块替换）
-  - 后端 API 和前端在同一进程，端口 5000
+  - 后端 API 和前端在同一进程，端口 8080
 
 - **生产模式** (`coze start`)：
   - `coze build` 构建前端 → `dist/` 目录

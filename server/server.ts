@@ -8,9 +8,9 @@ import router from './routes/index';
 import { setupVite } from './vite';
 import { getUploadRootDir } from './lib/config';
 
-// In the Coze sandbox the port comes from PORT; on Aliyun prefer DEPLOY_RUN_PORT/PORT, default 5000.
+// In the Coze sandbox the port comes from PORT; on Aliyun prefer DEPLOY_RUN_PORT/PORT, default 8080.
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
-const port = parseInt(process.env.PORT || process.env.DEPLOY_RUN_PORT || '5000', 10);
+const port = parseInt(process.env.PORT || process.env.DEPLOY_RUN_PORT || '8080', 10);
 const app = express();
 const server = createServer(app);
 
