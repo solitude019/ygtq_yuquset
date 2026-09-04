@@ -1,20 +1,23 @@
 import { Router, type Request, type Response } from 'express';
-import { getDb } from '../lib/supabase';
+import { query, execute } from '../lib/db';
 import { authMiddleware } from './auth';
 
 const router = Router();
 
+interface CategoryRow {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+}
+
 // GET /api/categories - List all categories (public)
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .select('*')
-      .order('name');
-
-    if (error) throw new Error(`Query failed: ${error.message}`);
-    res.json({ success: true, data: data || [] });
+    const rows = await query<CategoryRow[]>(
+      'SELECT id, name, description, created_at FROM categories ORDER BY name ASC'
+    );
+    res.json({ success: true, data: rows });
   } catch (err) {
     console.error('Get categories error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -30,15 +33,17 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
       return;
     }
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .insert({ name, description: description || '' })
-      .select()
-      .single();
+    const result = await execute(
+      'INSERT INTO categories (name, description) VALUES (?, ?)',
+      [name, description || '']
+    );
 
-    if (error) throw new Error(`Insert failed: ${error.message}`);
-    res.status(201).json({ success: true, data });
+    const rows = await query<CategoryRow[]>(
+      'SELECT id, name, description, created_at FROM categories WHERE id = ? LIMIT 1',
+      [result.insertId]
+    );
+
+    res.status(201).json({ success: true, data: rows[0] });
   } catch (err) {
     console.error('Create category error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -49,25 +54,36 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates: Record<string, string> = {};
-    if (req.body.name !== undefined) updates.name = req.body.name;
-    if (req.body.description !== undefined) updates.description = req.body.description;
+    const sets: string[] = [];
+    const params: unknown[] = [];
+    if (req.body.name !== undefined) {
+      sets.push('name = ?');
+      params.push(req.body.name);
+    }
+    if (req.body.description !== undefined) {
+      sets.push('description = ?');
+      params.push(req.body.description);
+    }
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('categories')
-      .update(updates)
-      .eq('id', Number(id))
-      .select()
-      .maybeSingle();
+    if (sets.length === 0) {
+      res.status(400).json({ error: 'No fields to update' });
+      return;
+    }
+    params.push(Number(id));
 
-    if (error) throw new Error(`Update failed: ${error.message}`);
-    if (!data) {
+    await execute(`UPDATE categories SET ${sets.join(', ')} WHERE id = ?`, params);
+
+    const rows = await query<CategoryRow[]>(
+      'SELECT id, name, description, created_at FROM categories WHERE id = ? LIMIT 1',
+      [Number(id)]
+    );
+
+    if (rows.length === 0) {
       res.status(404).json({ error: 'Category not found' });
       return;
     }
 
-    res.json({ success: true, data });
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error('Update category error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -78,15 +94,9 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const db = getDb();
-
-    const { error } = await db
-      .from('categories')
-      .delete()
-      .eq('id', Number(id));
-
-    if (error) throw new Error(`Delete failed: ${error.message}`);
-
+    // Detach products from this category, then remove the category.
+    await execute('UPDATE products SET category_id = NULL WHERE category_id = ?', [Number(id)]);
+    await execute('DELETE FROM categories WHERE id = ?', [Number(id)]);
     res.json({ success: true, message: 'Category deleted' });
   } catch (err) {
     console.error('Delete category error:', err);

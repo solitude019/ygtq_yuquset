@@ -1,10 +1,16 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getDb } from '../lib/supabase';
+import { query } from '../lib/db';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'yu-secret-key-2024';
+
+interface AdminRow {
+  id: number;
+  username: string;
+  password_hash: string;
+}
 
 interface AuthRequest extends Request {
   adminId?: number;
@@ -38,27 +44,25 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const db = getDb();
-    const { data, error } = await db
-      .from('admins')
-      .select('id, username, password_hash')
-      .eq('username', username)
-      .maybeSingle();
+    const rows = await query<AdminRow[]>(
+      'SELECT id, username, password_hash FROM admins WHERE username = ? LIMIT 1',
+      [username]
+    );
 
-    if (error) throw new Error(`Query failed: ${error.message}`);
-    if (!data) {
+    if (rows.length === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
-    const validPassword = await bcrypt.compare(password, data.password_hash);
+    const admin = rows[0];
+    const validPassword = await bcrypt.compare(password, admin.password_hash);
     if (!validPassword) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
     const token = jwt.sign(
-      { id: data.id, username: data.username },
+      { id: admin.id, username: admin.username },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -67,7 +71,7 @@ router.post('/login', async (req: Request, res: Response) => {
       success: true,
       data: {
         token,
-        admin: { id: data.id, username: data.username },
+        admin: { id: admin.id, username: admin.username },
       },
     });
   } catch (err) {

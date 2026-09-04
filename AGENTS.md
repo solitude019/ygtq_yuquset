@@ -4,10 +4,11 @@
 
 - **前端**: Vue 3 (Composition API + `<script setup>`), TypeScript, Vue Router, Pinia
 - **后端**: Node.js, Express, TypeScript
-- **数据库**: PostgreSQL (pg)
-- **构建工具**: Vite 7
+- **数据库**: MySQL 8 (mysql2)，生产部署在阿里云 ECS；建表与种子见 `schema.sql`
+- **构建工具**: Vite 7（前端构建产物输出到 `dist/client`）
 - **样式**: Tailwind CSS 3
 - **认证**: JWT (jsonwebtoken + bcryptjs)
+- **配置**: dotenv 读取 `.env`（参考 `.env.example`）；部署说明见 `DEPLOY.md`
 
 ## 目录结构
 
@@ -21,11 +22,14 @@
 │   ├── routes/         # API 路由
 │   │   ├── index.ts    # 路由汇总
 │   │   ├── auth.ts     # 认证路由 (登录/获取信息)
-│   │   ├── products.ts # 商品 CRUD 路由
-│   │   └── categories.ts # 分类 CRUD 路由
-│   ├── db.ts           # PostgreSQL 连接池
-│   ├── server.ts       # Express 服务入口
-│   └── vite.ts         # Vite 中间件集成
+│   │   ├── products.ts # 商品 CRUD 路由 (含 batch-delete 批量删除)
+│   │   ├── categories.ts # 分类 CRUD 路由
+│   │   └── upload.ts    # 商品图片本地上传路由 (multer, ≤5MB jpg/png)
+│   ├── lib/
+│   │   ├── db.ts        # MySQL 连接池 (query/execute)
+│   │   └── config.ts    # config 表键值配置 (上传根目录, 支持 UPLOAD_ROOT_DIR 覆盖)
+│   ├── server.ts        # Express 服务入口
+│   └── vite.ts          # Vite 中间件(dev) / 静态文件(prod) 集成
 ├── src/                # 前端源码
 │   ├── app/
 │   │   ├── api/        # API 客户端
@@ -46,9 +50,14 @@
 
 ## 数据库
 
-- 使用 PostgreSQL，通过 `exec_sql` 工具管理
-- 表: admins (管理员), categories (分类), products (商品)
+- 使用 **MySQL 8**（mysql2 连接池），建表与种子数据见项目根目录 `schema.sql`
+- 表: `admins` (管理员), `categories` (分类), `products` (商品), `config` (键值配置)
+- 初始化: `mysql -u yu -p yu_sports < schema.sql`
 - 连接配置通过环境变量: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+- 生产连接信息: 库 `yu_sports` / 用户 `yu`（见 `.env.example` 与 `DEPLOY.md`）
+- 商品图片为本地磁盘存储，根目录由 `config.upload_root_dir` 或环境变量 `UPLOAD_ROOT_DIR` 决定（生产为 `/opt/ygtq/product`），通过 `/uploads/*` 静态访问
+
+> 注意：沙箱开发环境无 MySQL，数据层面向阿里云生产；后端在连不上库时仅记录警告，不影响前端页面加载。
 
 ## API 接口
 
@@ -68,6 +77,16 @@
 - `POST /api/categories` - 创建分类
 - `PUT /api/categories/:id` - 更新分类
 - `DELETE /api/categories/:id` - 删除分类
+- `POST /api/products/batch-delete` - 批量删除商品 (body: { ids: number[] })
+- `POST /api/upload` - 上传商品图片 (multipart/formData, 返回 /uploads/文件名)
+
+## 常用命令
+
+- 开发: `pnpm dev`
+- 类型检查: `pnpm ts-check`
+- 生产构建前端: `pnpm build:client`（产物到 `dist/client`）
+- 生产启动: `pnpm start:prod`（需 `COZE_PROJECT_ENV=PROD`，tsx 运行 server/server.ts）
+- 完整部署步骤见 `DEPLOY.md`
 
 ## 前端路由
 

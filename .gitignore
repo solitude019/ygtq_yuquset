@@ -14,6 +14,10 @@ __pycache__/
 .env
 .cozeproj/reduction
 
+# Locally uploaded product images (stored outside the repo in production)
+/uploads
+/product
+
 # JS/TS bundlers & build outputs
 .next
 .nuxt
