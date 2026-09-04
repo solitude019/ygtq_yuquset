@@ -1,4 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
+import ProductsView from '../views/ProductsView.vue';
+import ProductDetailView from '../views/ProductDetailView.vue';
+import AboutView from '../views/AboutView.vue';
+import LoginView from '../views/LoginView.vue';
+import AdminView from '../views/AdminView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -7,32 +13,32 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
+      component: HomeView,
     },
     {
       path: '/products',
       name: 'products',
-      component: () => import('../views/ProductsView.vue'),
+      component: ProductsView,
     },
     {
       path: '/products/:id',
       name: 'product-detail',
-      component: () => import('../views/ProductDetailView.vue'),
+      component: ProductDetailView,
     },
     {
       path: '/about',
       name: 'about',
-      component: () => import('../views/AboutView.vue'),
+      component: AboutView,
     },
     {
       path: '/admin/login',
       name: 'admin-login',
-      component: () => import('../views/LoginView.vue'),
+      component: LoginView,
     },
     {
       path: '/admin',
       name: 'admin-dashboard',
-      component: () => import('../views/AdminView.vue'),
+      component: AdminView,
       meta: { requiresAuth: true },
     },
   ],
