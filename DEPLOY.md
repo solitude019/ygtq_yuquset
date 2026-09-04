@@ -211,30 +211,46 @@ pnpm build:client
 
 ## 八、启动应用（pm2 托管）
 
-### 1. 用 pm2 启动
+项目自带 pm2 配置文件 `ecosystem.config.cjs`，用 **node 直接运行 tsx CLI**（避免 `pnpm` 包装产生孤儿进程，以及 pnpm 的 `.bin/tsx` 软链被 pm2 误解析导致 `ERR_MODULE_NOT_FOUND ... /tsx`）。
+
+### 1. 清掉历史进程（首次或排查时执行）
 
 ```bash
-cd /opt/ygtq/ygtq_yuquest
-COZE_PROJECT_ENV=PROD pm2 start "pnpm start:prod" --name ygtq_yuquest
+cd /opt/ygtq/ygtq_yuquset
+pm2 delete all 2>/dev/null
+pm2 flush 2>/dev/null
+pkill -f "server/server.ts" 2>/dev/null
+sleep 2
+ss -lntp | grep -E ':(8080|5000)\b'   # 确认 8080 未被占用（5000 若被其他系统服务占用可忽略）
 ```
 
-`start:prod` 实际执行 `tsx server/server.ts`，会读取 `.env`、连接 MySQL、监听 8080 端口并托管 `dist/client`。
+### 2. 用 ecosystem 配置启动
 
-### 2. 设置开机自启
+```bash
+cd /opt/ygtq/ygtq_yuquset
+pm2 start ecosystem.config.cjs
+```
+
+该配置让 node 运行 `node_modules/tsx/dist/cli.mjs server/server.ts`，`server.ts` 顶部的 `dotenv/config` 会读取项目根目录 `.env`（`PORT=8080`、`COZE_PROJECT_ENV=PROD`、数据库配置等），连接 MySQL、监听 8080 并托管 `dist/client`。
+
+> 若不用配置文件，等价命令为：
+> `cd /opt/ygtq/ygtq_yuquset && pm2 start node_modules/tsx/dist/cli.mjs --name ygtq_yuquest --cwd /opt/ygtq/ygtq_yuquset -- server/server.ts`
+
+### 3. 设置开机自启
 
 ```bash
 pm2 save
 pm2 startup        # 按提示执行它输出的那条命令
 ```
 
-### 3. 查看日志 / 状态
+### 4. 查看日志 / 状态
 
 ```bash
 pm2 status
-pm2 logs ygtq_yuquest --lines 50
+pm2 logs ygtq_yuquest --lines 30 --nostream
 ```
 
-正常应看到：
+正常应看到（只出现一次，无 `EADDRINUSE`、无 `ERR_MODULE_NOT_FOUND`、无 `exit code 130`）：
 
 ```
 [config] upload root directory: /opt/ygtq/product
@@ -242,9 +258,10 @@ Serving static files from dist/client/
 Server running on http://0.0.0.0:8080 [PROD]
 ```
 
-### 4. 本机自测
+### 5. 本机自测
 
 ```bash
+ss -lntp | grep 8080                 # 应只有一个 node/tsx 监听 8080
 curl -s http://127.0.0.1:8080/api/products | head
 curl -I  http://127.0.0.1:8080/
 ```
@@ -380,11 +397,11 @@ pm2 status
 pm2 logs ygtq_yuquest
 
 # 更新代码后重新发布
-cd /opt/ygtq/ygtq_yuquest
+cd /opt/ygtq/ygtq_yuquset
 git pull            # 或重新 rsync 上传
 pnpm install        # 依赖有变化时
-pnpm build:client
-pm2 restart ygtq_yuquest
+pnpm build:client   # 前端有改动时
+pm2 restart ygtq_yuquest --update-env
 
 # 停止 / 删除
 pm2 stop ygtq_yuquest
