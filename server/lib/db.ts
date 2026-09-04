@@ -14,7 +14,7 @@ type SqlParams = SqlParam[];
  *   DB_PORT=3306
  *   DB_NAME=yu_sports
  *   DB_USER=yu
- *   DB_PASSWORD=YuQuest2026
+ *   DB_PASSWORD=YuQuest@2026
  */
 let pool: Pool | null = null;
 
