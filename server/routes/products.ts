@@ -108,6 +108,39 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/products/batch-delete - Delete multiple products (admin)
+router.post('/batch-delete', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { ids } = req.body as { ids?: unknown };
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: 'A non-empty array of product ids is required' });
+      return;
+    }
+
+    const numericIds = ids.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (numericIds.length === 0) {
+      res.status(400).json({ error: 'No valid product ids provided' });
+      return;
+    }
+
+    const db = getDb();
+    const { data, error } = await db
+      .from('products')
+      .delete()
+      .in('id', numericIds)
+      .select('id');
+
+    if (error) throw new Error(`Batch delete failed: ${error.message}`);
+
+    const deletedCount = data ? data.length : 0;
+    res.json({ success: true, data: { deleted: deletedCount } });
+  } catch (err) {
+    console.error('Batch delete products error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // PUT /api/products/:id - Update product (admin)
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {

@@ -58,10 +58,41 @@
             <p class="text-[#999]">No products found</p>
           </div>
 
-          <!-- Grid -->
-          <div v-else class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            <ProductCard v-for="product in sortedProducts" :key="product.id" :product="product" />
-          </div>
+          <template v-else>
+            <!-- Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <ProductCard v-for="product in pagedProducts" :key="product.id" :product="product" />
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-10 flex-wrap">
+              <button
+                class="px-3 py-2 rounded text-sm border border-gray-200 bg-white text-[#1A1A1A] disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+                :disabled="currentPage === 1"
+                @click="goToPage(currentPage - 1)"
+              >
+                Prev
+              </button>
+              <button
+                v-for="page in pageNumbers"
+                :key="page"
+                class="w-10 h-10 rounded text-sm border transition-colors"
+                :class="page === currentPage
+                  ? 'bg-[#DC2626] border-[#DC2626] text-white font-semibold'
+                  : 'bg-white border-gray-200 text-[#1A1A1A] hover:border-[#DC2626] hover:text-[#DC2626]'"
+                @click="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+              <button
+                class="px-3 py-2 rounded text-sm border border-gray-200 bg-white text-[#1A1A1A] disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(currentPage + 1)"
+              >
+                Next
+              </button>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -77,11 +108,14 @@ import ProductCard from '../components/ProductCard.vue';
 const route = useRoute();
 const router = useRouter();
 
+const PAGE_SIZE = 8;
+
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);
 const loading = ref(true);
 const selectedCategory = ref<number | null>(null);
 const sortBy = ref('default');
+const currentPage = ref(1);
 
 const filteredProducts = computed(() => {
   if (!selectedCategory.value) return products.value;
@@ -98,12 +132,44 @@ const sortedProducts = computed(() => {
   }
 });
 
+const totalPages = computed(() => Math.max(1, Math.ceil(sortedProducts.value.length / PAGE_SIZE)));
+
+const pagedProducts = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE;
+  return sortedProducts.value.slice(start, start + PAGE_SIZE);
+});
+
+// Pages to show (with ellipsis logic kept simple: show window around current page)
+const pageNumbers = computed<number[]>(() => {
+  const total = totalPages.value;
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages = new Set<number>([1, total, currentPage.value, currentPage.value - 1, currentPage.value + 1]);
+  return Array.from(pages)
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
+});
+
+function goToPage(page: number): void {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
 watch(selectedCategory, (val) => {
+  currentPage.value = 1;
   if (val) {
     router.replace({ query: { category: String(val) } });
   } else {
     router.replace({ query: {} });
   }
+});
+
+watch(sortBy, () => {
+  currentPage.value = 1;
 });
 
 onMounted(async () => {

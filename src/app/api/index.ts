@@ -113,6 +113,14 @@ export const apiClient = {
     });
   },
 
+  deleteProducts(token: string, ids: number[]): Promise<{ deleted: number }> {
+    return request<{ deleted: number }>('/products/batch-delete', {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ ids }),
+    });
+  },
+
   // Categories (admin)
   createCategory(token: string, data: { name: string; description: string }): Promise<Category> {
     return request<Category>('/categories', {

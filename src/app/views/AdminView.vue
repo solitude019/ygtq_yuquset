@@ -41,10 +41,20 @@
       <div v-if="activeTab === 'products'">
         <div class="flex items-center justify-between mb-6">
           <h2 class="font-heading font-semibold text-xl text-primary">Products ({{ products.length }})</h2>
-          <button @click="openProductForm(null)" class="btn-primary text-sm flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Add Product
-          </button>
+          <div class="flex items-center gap-3">
+            <button
+              v-if="selectedIds.length > 0"
+              @click="handleBatchDelete"
+              class="text-sm flex items-center gap-1 px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors font-medium"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              Delete Selected ({{ selectedIds.length }})
+            </button>
+            <button @click="openProductForm(null)" class="btn-primary text-sm flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add Product
+            </button>
+          </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -52,6 +62,15 @@
             <table class="w-full">
               <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th class="px-4 py-3 w-12">
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                      :checked="allPageSelected"
+                      :indeterminate.prop="somePageSelected && !allPageSelected"
+                      @change="toggleSelectAll"
+                    />
+                  </th>
                   <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Product</th>
                   <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">No.</th>
                   <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Category</th>
@@ -61,7 +80,15 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <tr v-for="p in products" :key="p.id" class="hover:bg-slate-50 transition-colors">
+                <tr v-for="p in pagedProducts" :key="p.id" class="hover:bg-slate-50 transition-colors" :class="{ 'bg-red-50/40': selectedIds.includes(p.id) }">
+                  <td class="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                      :value="p.id"
+                      v-model="selectedIds"
+                    />
+                  </td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                       <img :src="p.image_url || 'https://placehold.co/40x40/f8fafc/94a3b8?text=?'" class="w-10 h-10 rounded-lg object-cover" @error="handleTableImageError" />
@@ -81,8 +108,45 @@
                     </div>
                   </td>
                 </tr>
+                <tr v-if="pagedProducts.length === 0">
+                  <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-400">No products yet</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+            <p class="text-sm text-slate-500">
+              Page {{ currentPage }} of {{ totalPages }}
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                class="px-3 py-1.5 rounded text-sm border border-gray-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:border-red-600 hover:text-red-600 transition-colors"
+                :disabled="currentPage === 1"
+                @click="goToPage(currentPage - 1)"
+              >
+                Prev
+              </button>
+              <button
+                v-for="page in pageNumbers"
+                :key="page"
+                class="w-9 h-9 rounded text-sm border transition-colors"
+                :class="page === currentPage
+                  ? 'bg-primary border-primary text-white font-semibold'
+                  : 'border-gray-200 text-slate-600 hover:border-red-600 hover:text-red-600'"
+                @click="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+              <button
+                class="px-3 py-1.5 rounded text-sm border border-gray-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:border-red-600 hover:text-red-600 transition-colors"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(currentPage + 1)"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -198,7 +262,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { apiClient, type Product, type Category } from '../api';
@@ -206,9 +270,58 @@ import { apiClient, type Product, type Category } from '../api';
 const router = useRouter();
 const authStore = useAuthStore();
 
+const PAGE_SIZE = 10;
+
 const activeTab = ref<'products' | 'categories'>('products');
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);
+
+// Product pagination & selection
+const currentPage = ref(1);
+const selectedIds = ref<number[]>([]);
+
+const totalPages = computed(() => Math.max(1, Math.ceil(products.value.length / PAGE_SIZE)));
+
+const pagedProducts = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE;
+  return products.value.slice(start, start + PAGE_SIZE);
+});
+
+const pageNumbers = computed<number[]>(() => {
+  const total = totalPages.value;
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages = new Set<number>([1, total, currentPage.value, currentPage.value - 1, currentPage.value + 1]);
+  return Array.from(pages)
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
+});
+
+const allPageSelected = computed(() =>
+  pagedProducts.value.length > 0 && pagedProducts.value.every((p) => selectedIds.value.includes(p.id)),
+);
+
+const somePageSelected = computed(() =>
+  pagedProducts.value.some((p) => selectedIds.value.includes(p.id)),
+);
+
+function goToPage(page: number): void {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
+}
+
+function toggleSelectAll(e: Event): void {
+  const checked = (e.target as HTMLInputElement).checked;
+  const pageIds = pagedProducts.value.map((p) => p.id);
+  if (checked) {
+    const merged = new Set([...selectedIds.value, ...pageIds]);
+    selectedIds.value = Array.from(merged);
+  } else {
+    const pageSet = new Set(pageIds);
+    selectedIds.value = selectedIds.value.filter((id) => !pageSet.has(id));
+  }
+}
 
 // Product form
 const showProductForm = ref(false);
@@ -246,6 +359,12 @@ async function loadData(): Promise<void> {
     ]);
     products.value = productsData;
     categories.value = categoriesData;
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    // Prune selected ids that no longer exist
+    const validIds = new Set(products.value.map((p) => p.id));
+    selectedIds.value = selectedIds.value.filter((id) => validIds.has(id));
   } catch (err) {
     console.error('Failed to load data:', err);
   }
@@ -294,6 +413,7 @@ async function handleSaveProduct(): Promise<void> {
       await apiClient.updateProduct(authStore.token, editingProduct.value.id, { ...productForm });
     } else {
       await apiClient.createProduct(authStore.token, { ...productForm });
+      currentPage.value = 1;
     }
     showProductForm.value = false;
     await loadData();
@@ -311,9 +431,30 @@ async function handleDeleteProduct(id: number): Promise<void> {
 
   try {
     await apiClient.deleteProduct(authStore.token, id);
+    selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
     await loadData();
   } catch (err) {
     console.error('Failed to delete product:', err);
+    alert(err instanceof Error ? err.message : 'Failed to delete product');
+  }
+}
+
+async function handleBatchDelete(): Promise<void> {
+  if (!authStore.token) return;
+  if (selectedIds.value.length === 0) return;
+  if (!confirm(`Are you sure you want to delete ${selectedIds.value.length} selected product(s)? This action cannot be undone.`)) return;
+
+  try {
+    const result = await apiClient.deleteProducts(authStore.token, [...selectedIds.value]);
+    selectedIds.value = [];
+    await loadData();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    alert(`Successfully deleted ${result.deleted} product(s).`);
+  } catch (err) {
+    console.error('Failed to batch delete products:', err);
+    alert(err instanceof Error ? err.message : 'Failed to delete products');
   }
 }
 
